@@ -5,6 +5,11 @@ export const registerUser = (data) => {
   return API.post("api/accounts/register/", data);
 };
 
+
+export const verifyCode = (data) => {
+  return API.post("api/accounts/verify-code/", data);
+};
+
 export const registerPartner = (data) => {
    return API.post("/api/accounts/partner/register/", data);
 };

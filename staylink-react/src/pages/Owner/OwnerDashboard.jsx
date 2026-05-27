@@ -1,48 +1,65 @@
-import React, { useState, useEffect } from "react";
-import TopNavbar from "../../components/OwnerDashboardCOmponents/TopNavbar";
+import React, { useEffect, useState } from "react";
 
-import {
-  Building2,
-  Clock3,
-  CheckCircle2,
-  XCircle,
-  Home,
-  CalendarDays,
-  IndianRupee,
-  ShieldCheck,
-} from "lucide-react";
+import TopNavbar from "../../components/OwnerDashboardComponents/TopNavbar";
+
+import DashboardHeader from "../../components/OwnerDashboardComponents/DashboardHeader";
+
+import VerificationBanner from "../../components/OwnerDashboardComponents/VerificationBanner";
+
+import DashboardStats from "../../components/OwnerDashboardComponents/DashboardStats";
+
+import QuickActions from "../../components/OwnerDashboardComponents/QuickActions";
+
+import PropertySection from "../../components/OwnerDashboardComponents/PropertySection";
+
+import QuickStatistics from "../../components/OwnerDashboardComponents/QuickStatistics";
+
+import SupportSection from "../../components/OwnerDashboardComponents/SupportSection";
+
+import TipCard from "../../components/OwnerDashboardComponents/TipCard";
 
 import {
   getOwnerProfile,
 } from "../../services/authService";
 
+import {
+  getMyProperties,
+} from "../../services/propertyService";
+
+
+
 const OwnerDashboard = () => {
+
+  const [loading, setLoading] = useState(true);
+
+  const [properties, setProperties] = useState([]);
 
   const [verificationStatus, setVerificationStatus] =
     useState("pending");
 
-  const [loading, setLoading] = useState(true);
+  const [showNotification, setShowNotification] =
+    useState(true);
 
-  const handleSearch = (value) => {
-    console.log("Search:", value);
-  };
 
-  // =========================
-  // Fetch Owner Profile
-  // =========================
 
   useEffect(() => {
 
-    const fetchProfile = async () => {
+    const fetchDashboardData = async () => {
 
       try {
 
-        const response = await getOwnerProfile();
-
-        console.log(response.data);
+        const profileResponse =
+          await getOwnerProfile();
 
         setVerificationStatus(
-          response.data.verification_status
+          profileResponse.data.verification_status
+        );
+
+        const propertyResponse =
+          await getMyProperties();
+
+        setProperties(
+          propertyResponse.data
         );
 
       } catch (error) {
@@ -52,410 +69,171 @@ const OwnerDashboard = () => {
       } finally {
 
         setLoading(false);
+
       }
     };
 
-    fetchProfile();
+    fetchDashboardData();
 
   }, []);
 
-  // =========================
-  // Loading Screen
-  // =========================
+
+
+  const handleSearch = (value) => {
+
+    console.log(value);
+
+  };
+
+
+
+  const isApproved =
+    verificationStatus === "approved";
+
+
 
   if (loading) {
+
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <h1 className="text-xl font-semibold text-gray-700">
-          Loading Dashboard...
-        </h1>
-      </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
 
-      {/* Navbar */}
-      <TopNavbar onSearch={handleSearch} />
+        <div className="text-center">
 
-      {/* Main Content */}
-      <div className="pt-24 px-4 md:px-10 pb-10">
+          <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
 
-        {/* Welcome Section */}
-        <div className="mb-8">
+          <p className="text-gray-600 font-medium">
 
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Welcome Back 👋
-          </h1>
+            Loading Dashboard...
 
-          <p className="text-gray-500 mt-2">
-            Manage your properties, bookings and earnings
           </p>
 
         </div>
 
-        {/* =========================
-            Pending Banner
-        ========================= */}
-
-        {verificationStatus === "pending" && (
-
-          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 mb-8">
-
-            <div className="flex items-start gap-4">
-
-              <div className="bg-yellow-100 p-3 rounded-full">
-                <Clock3
-                  className="text-yellow-600"
-                  size={28}
-                />
-              </div>
-
-              <div>
-
-                <h2 className="text-xl font-bold text-yellow-800">
-                  Profile Verification Pending
-                </h2>
-
-                <p className="text-yellow-700 mt-2 max-w-2xl">
-                  Your profile has been submitted successfully
-                  and is currently under admin review.
-                  Once approved, you will be able to add
-                  properties, manage bookings and access all
-                  owner features.
-                </p>
-
-                <button className="mt-4 bg-yellow-600 text-white px-5 py-2 rounded-lg font-medium cursor-not-allowed">
-                  Verification In Progress
-                </button>
-
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* =========================
-            Rejected Banner
-        ========================= */}
-
-        {verificationStatus === "rejected" && (
-
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-8">
-
-            <div className="flex items-start gap-4">
-
-              <div className="bg-red-100 p-3 rounded-full">
-                <XCircle
-                  className="text-red-600"
-                  size={28}
-                />
-              </div>
-
-              <div>
-
-                <h2 className="text-xl font-bold text-red-800">
-                  Verification Rejected
-                </h2>
-
-                <p className="text-red-700 mt-2">
-                  Your profile verification was rejected
-                  by admin. Please update your details
-                  and resubmit verification request.
-                </p>
-
-                <button className="mt-4 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-medium transition">
-                  Update Profile
-                </button>
-
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* =========================
-            Approved Banner
-        ========================= */}
-
-        {verificationStatus === "approved" && (
-
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-8">
-
-            <div className="flex items-start gap-4">
-
-              <div className="bg-green-100 p-3 rounded-full">
-                <CheckCircle2
-                  className="text-green-600"
-                  size={28}
-                />
-              </div>
-
-              <div>
-
-                <h2 className="text-xl font-bold text-green-800">
-                  Profile Approved
-                </h2>
-
-                <p className="text-green-700 mt-2">
-                  Your account is verified successfully.
-                  You can now manage properties,
-                  bookings and earnings.
-                </p>
-
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* =========================
-            Dashboard Cards
-        ========================= */}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-
-          {/* Properties */}
-
-          <div className="bg-white rounded-2xl shadow-sm p-6">
-
-            <div className="flex items-center justify-between">
-
-              <div>
-
-                <p className="text-gray-500 text-sm">
-                  Total Properties
-                </p>
-
-                <h2 className="text-3xl font-bold mt-2">
-                  0
-                </h2>
-
-              </div>
-
-              <div className="bg-blue-100 p-3 rounded-xl">
-                <Building2 className="text-blue-600" />
-              </div>
-
-            </div>
-          </div>
-
-          {/* Bookings */}
-
-          <div className="bg-white rounded-2xl shadow-sm p-6">
-
-            <div className="flex items-center justify-between">
-
-              <div>
-
-                <p className="text-gray-500 text-sm">
-                  Bookings
-                </p>
-
-                <h2 className="text-3xl font-bold mt-2">
-                  0
-                </h2>
-
-              </div>
-
-              <div className="bg-green-100 p-3 rounded-xl">
-                <CalendarDays className="text-green-600" />
-              </div>
-
-            </div>
-          </div>
-
-          {/* Revenue */}
-
-          <div className="bg-white rounded-2xl shadow-sm p-6">
-
-            <div className="flex items-center justify-between">
-
-              <div>
-
-                <p className="text-gray-500 text-sm">
-                  Revenue
-                </p>
-
-                <h2 className="text-3xl font-bold mt-2">
-                  ₹0
-                </h2>
-
-              </div>
-
-              <div className="bg-purple-100 p-3 rounded-xl">
-                <IndianRupee className="text-purple-600" />
-              </div>
-
-            </div>
-          </div>
-
-          {/* Verification */}
-
-          <div className="bg-white rounded-2xl shadow-sm p-6">
-
-            <div className="flex items-center justify-between">
-
-              <div>
-
-                <p className="text-gray-500 text-sm">
-                  Verification
-                </p>
-
-                <h2 className="text-lg font-semibold mt-2 capitalize">
-                  {verificationStatus}
-                </h2>
-
-              </div>
-
-              <div className="bg-orange-100 p-3 rounded-xl">
-                <ShieldCheck className="text-orange-600" />
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-        {/* =========================
-            Quick Actions
-        ========================= */}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          {/* Left */}
-
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm p-6">
-
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Quick Actions
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-              {/* Add Property */}
-
-              <button
-                disabled={verificationStatus !== "approved"}
-                className={`p-5 rounded-2xl border transition text-left ${
-                  verificationStatus === "approved"
-                    ? "hover:border-blue-500 hover:bg-blue-50 cursor-pointer"
-                    : "bg-gray-100 cursor-not-allowed"
-                }`}
-              >
-
-                <div className="bg-blue-100 w-fit p-3 rounded-xl mb-4">
-                  <Home className="text-blue-600" />
-                </div>
-
-                <h3 className="font-bold text-lg">
-                  Add Property
-                </h3>
-
-                <p className="text-gray-500 text-sm mt-1">
-                  Add new stays and rental properties
-                </p>
-
-              </button>
-
-              {/* Manage Bookings */}
-
-              <button
-                disabled={verificationStatus !== "approved"}
-                className={`p-5 rounded-2xl border transition text-left ${
-                  verificationStatus === "approved"
-                    ? "hover:border-green-500 hover:bg-green-50 cursor-pointer"
-                    : "bg-gray-100 cursor-not-allowed"
-                }`}
-              >
-
-                <div className="bg-green-100 w-fit p-3 rounded-xl mb-4">
-                  <CalendarDays className="text-green-600" />
-                </div>
-
-                <h3 className="font-bold text-lg">
-                  Manage Bookings
-                </h3>
-
-                <p className="text-gray-500 text-sm mt-1">
-                  View and manage all customer bookings
-                </p>
-
-              </button>
-
-            </div>
-          </div>
-
-          {/* Right */}
-
-          <div className="bg-white rounded-2xl shadow-sm p-6">
-
-            <h2 className="text-xl font-bold text-gray-900 mb-5">
-              Account Status
-            </h2>
-
-            <div className="space-y-4">
-
-              <div className="flex items-center justify-between">
-
-                <span className="text-gray-500">
-                  Profile Submitted
-                </span>
-
-                <CheckCircle2
-                  className="text-green-500"
-                  size={20}
-                />
-
-              </div>
-
-              <div className="flex items-center justify-between">
-
-                <span className="text-gray-500">
-                  Admin Verification
-                </span>
-
-                {verificationStatus === "approved" ? (
-
-                  <CheckCircle2
-                    className="text-green-500"
-                    size={20}
-                  />
-
-                ) : (
-
-                  <Clock3
-                    className="text-yellow-500"
-                    size={20}
-                  />
-
-                )}
-              </div>
-
-              <div className="flex items-center justify-between">
-
-                <span className="text-gray-500">
-                  Property Access
-                </span>
-
-                {verificationStatus === "approved" ? (
-
-                  <CheckCircle2
-                    className="text-green-500"
-                    size={20}
-                  />
-
-                ) : (
-
-                  <XCircle
-                    className="text-red-400"
-                    size={20}
-                  />
-
-                )}
-              </div>
-
-            </div>
-          </div>
-        </div>
       </div>
+    );
+  }
+
+
+
+  return (
+
+    <div className="min-h-screen bg-gray-50">
+
+      <TopNavbar onSearch={handleSearch} />
+
+
+
+      <div className="pt-20 px-6 md:px-10 pb-12 max-w-[1600px] mx-auto">
+
+        <DashboardHeader />
+
+
+
+        <VerificationBanner
+          verificationStatus={verificationStatus}
+          showNotification={showNotification}
+          setShowNotification={setShowNotification}
+        />
+
+
+
+        <div className="relative mt-6 rounded-3xl overflow-hidden">
+
+          {!isApproved && (
+
+            <div className="absolute inset-0 z-50 bg-white/70 backdrop-blur-sm flex items-center justify-center">
+
+              <div className="bg-white shadow-2xl border border-gray-100 rounded-3xl p-10 max-w-lg text-center">
+
+                <div className="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+
+                  <span className="text-5xl">
+
+                    🔒
+
+                  </span>
+
+                </div>
+
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">
+
+                  Verification Pending
+
+                </h2>
+
+                <p className="text-gray-600 leading-relaxed text-lg">
+
+                  Your account is currently under admin review.
+
+                  Once approved, all owner dashboard features
+                  including property management, analytics,
+                  and booking controls will be unlocked.
+
+                </p>
+
+                <div className="mt-8 flex items-center justify-center gap-3">
+
+                  <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+
+                  <span className="text-sm font-medium text-yellow-700">
+
+                    Waiting for approval
+
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          )}
+
+
+
+          <div
+            className={
+              !isApproved
+                ? "pointer-events-none select-none opacity-50 blur-[1px]"
+                : ""
+            }
+          >
+
+            <DashboardStats
+              properties={properties}
+            />
+
+
+
+            <QuickActions />
+
+
+
+            <PropertySection
+              properties={properties}
+            />
+
+
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
+
+              <QuickStatistics
+                properties={properties}
+              />
+
+              <SupportSection />
+
+              <TipCard />
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
   );
 };

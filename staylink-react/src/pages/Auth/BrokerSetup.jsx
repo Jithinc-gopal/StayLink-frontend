@@ -75,13 +75,17 @@ const BrokerSetup = () => {
     e.preventDefault();
 
     if (
-      !form.phone ||
-      !form.address ||
-      !form.city ||
-      !form.district ||
-      !form.pincode ||
-      !form.agency_name ||
-      form.experience === ""
+      !form.phone.trim() ||
+      !form.address.trim() ||
+      !form.city.trim() ||
+      !form.district.trim() ||
+      !form.state.trim() ||
+      !form.pincode.trim() ||
+      !form.agency_name.trim() ||
+      !form.license_number.trim() ||
+      form.experience === "" ||
+      !form.profile_image ||
+      !form.id_proof
     ) {
 
       alert("Please fill all required fields");
@@ -103,7 +107,6 @@ const BrokerSetup = () => {
       data.append("pincode", form.pincode);
       data.append("agency_name", form.agency_name);
 
-      // IMPORTANT
       data.append(
         "experience",
         Number(form.experience)
@@ -114,21 +117,15 @@ const BrokerSetup = () => {
         form.license_number
       );
 
-      if (form.profile_image) {
+      data.append(
+        "profile_image",
+        form.profile_image
+      );
 
-        data.append(
-          "profile_image",
-          form.profile_image
-        );
-      }
-
-      if (form.id_proof) {
-
-        data.append(
-          "id_proof",
-          form.id_proof
-        );
-      }
+      data.append(
+        "id_proof",
+        form.id_proof
+      );
 
       /* =========================
           CREATE PROFILE
@@ -165,10 +162,6 @@ const BrokerSetup = () => {
         "Profile submitted successfully"
       );
 
-      /* =========================
-          IMPORTANT FIX
-      ========================= */
-
       window.location.href =
         "/broker/dashboard";
 
@@ -180,30 +173,19 @@ const BrokerSetup = () => {
 
         const errors = err.response.data;
 
-        /* =========================
-            HANDLE OBJECT ERRORS
-        ========================= */
+        const firstKey =
+          Object.keys(errors)[0];
 
-        if (typeof errors === "object") {
+        const firstError =
+          errors[firstKey];
 
-          const firstKey =
-            Object.keys(errors)[0];
+        if (Array.isArray(firstError)) {
 
-          const firstError =
-            errors[firstKey];
-
-          if (Array.isArray(firstError)) {
-
-            alert(firstError[0]);
-
-          } else {
-
-            alert(firstError);
-          }
+          alert(firstError[0]);
 
         } else {
 
-          alert("Failed to create profile");
+          alert(firstError);
         }
 
       } else {
@@ -303,6 +285,7 @@ const BrokerSetup = () => {
               />
 
               <input
+                required
                 id="phone"
                 type="text"
                 placeholder="Phone Number"
@@ -323,6 +306,7 @@ const BrokerSetup = () => {
               />
 
               <textarea
+                required
                 id="address"
                 placeholder="Address"
                 value={form.address}
@@ -335,6 +319,7 @@ const BrokerSetup = () => {
             {/* CITY */}
 
             <input
+              required
               id="city"
               type="text"
               placeholder="City"
@@ -346,6 +331,7 @@ const BrokerSetup = () => {
             {/* DISTRICT */}
 
             <input
+              required
               id="district"
               type="text"
               placeholder="District"
@@ -357,6 +343,7 @@ const BrokerSetup = () => {
             {/* STATE */}
 
             <input
+              required
               id="state"
               type="text"
               value={form.state}
@@ -367,6 +354,7 @@ const BrokerSetup = () => {
             {/* PINCODE */}
 
             <input
+              required
               id="pincode"
               type="text"
               placeholder="Pincode"
@@ -385,6 +373,7 @@ const BrokerSetup = () => {
               />
 
               <input
+                required
                 id="agency_name"
                 type="text"
                 placeholder="Agency Name"
@@ -405,6 +394,7 @@ const BrokerSetup = () => {
               />
 
               <input
+                required
                 id="experience"
                 type="number"
                 placeholder="Experience (Years)"
@@ -418,9 +408,10 @@ const BrokerSetup = () => {
             {/* LICENSE */}
 
             <input
+              required
               id="license_number"
               type="text"
-              placeholder="License Number (Optional)"
+              placeholder="License Number"
               value={form.license_number}
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-xl bg-[#f1f3ff] text-sm outline-none"
@@ -436,8 +427,10 @@ const BrokerSetup = () => {
               />
 
               <input
+                required
                 id="profile_image"
                 type="file"
+                placeholder="Profile image"
                 onChange={handleChange}
                 className="w-full pl-8 text-sm"
               />
@@ -454,8 +447,10 @@ const BrokerSetup = () => {
               />
 
               <input
+                required
                 id="id_proof"
                 type="file"
+                placeholder="ID Proof"
                 onChange={handleChange}
                 className="w-full pl-8 text-sm"
               />
@@ -487,7 +482,9 @@ const BrokerSetup = () => {
           </footer>
 
         </section>
+
       </main>
+
     </div>
   );
 };

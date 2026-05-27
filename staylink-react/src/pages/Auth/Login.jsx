@@ -77,7 +77,7 @@ const LoginModal = () => {
       setLoading(true);
 
       const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}api/accounts/google-login/`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/accounts/google-login/`,
         {
           token: credentialResponse.credential
         }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   Clock3,
@@ -15,10 +16,16 @@ import {
 
 const BrokerDashboard = () => {
 
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState(true);
 
   const [verificationStatus, setVerificationStatus] =
     useState("pending");
+
+  // =========================
+  // FETCH BROKER PROFILE
+  // =========================
 
   useEffect(() => {
 
@@ -26,8 +33,9 @@ const BrokerDashboard = () => {
 
       try {
 
-        const response =
-          await getBrokerProfile();
+        const response = await getBrokerProfile();
+
+        console.log(response.data);
 
         setVerificationStatus(
           response.data.verification_status
@@ -36,6 +44,19 @@ const BrokerDashboard = () => {
       } catch (error) {
 
         console.log(error);
+
+        // =========================
+        // PROFILE NOT CREATED
+        // =========================
+
+        if (
+          error.response &&
+          error.response.status === 404
+        ) {
+
+          navigate("/broker/create-profile");
+
+        }
 
       } finally {
 
@@ -46,20 +67,33 @@ const BrokerDashboard = () => {
 
     fetchProfile();
 
-  }, []);
+  }, [navigate]);
+
+  // =========================
+  // LOADING SCREEN
+  // =========================
 
   if (loading) {
+
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading Dashboard...
+
+      <div className="min-h-screen flex items-center justify-center bg-[#f1f3ff]">
+
+        <h1 className="text-xl font-semibold text-[#041b3c]">
+          Loading Dashboard...
+        </h1>
+
       </div>
     );
   }
 
   return (
+
     <div className="min-h-screen bg-[#f1f3ff] p-6">
 
-      {/* HEADER */}
+      {/* =========================
+          HEADER
+      ========================= */}
 
       <div className="mb-8">
 
@@ -74,7 +108,7 @@ const BrokerDashboard = () => {
       </div>
 
       {/* =========================
-          PENDING
+          PENDING BANNER
       ========================= */}
 
       {verificationStatus === "pending" && (
@@ -104,13 +138,19 @@ const BrokerDashboard = () => {
                 broker features.
               </p>
 
+              <button className="mt-4 bg-yellow-600 text-white px-5 py-2 rounded-lg font-medium cursor-not-allowed">
+
+                Verification In Progress
+
+              </button>
+
             </div>
           </div>
         </div>
       )}
 
       {/* =========================
-          APPROVED
+          APPROVED BANNER
       ========================= */}
 
       {verificationStatus === "approved" && (
@@ -136,6 +176,7 @@ const BrokerDashboard = () => {
 
               <p className="text-green-700 mt-2">
                 Your broker account is verified successfully.
+                You can now access all broker features.
               </p>
 
             </div>
@@ -144,7 +185,7 @@ const BrokerDashboard = () => {
       )}
 
       {/* =========================
-          REJECTED
+          REJECTED BANNER
       ========================= */}
 
       {verificationStatus === "rejected" && (
@@ -169,17 +210,33 @@ const BrokerDashboard = () => {
               </h2>
 
               <p className="text-red-700 mt-2">
-                Please update your broker profile.
+                Your broker verification was rejected.
+                Please update your profile and resubmit.
               </p>
+
+              <button
+                onClick={() =>
+                  navigate("/broker/profile")
+                }
+                className="mt-4 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-medium transition"
+              >
+
+                Update Profile
+
+              </button>
 
             </div>
           </div>
         </div>
       )}
 
-      {/* DASHBOARD CARDS */}
+      {/* =========================
+          DASHBOARD CARDS
+      ========================= */}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+        {/* LISTINGS */}
 
         <div className="bg-white p-6 rounded-2xl shadow-sm">
 
@@ -205,6 +262,8 @@ const BrokerDashboard = () => {
           </div>
         </div>
 
+        {/* CLIENTS */}
+
         <div className="bg-white p-6 rounded-2xl shadow-sm">
 
           <div className="flex items-center justify-between">
@@ -229,6 +288,8 @@ const BrokerDashboard = () => {
           </div>
         </div>
 
+        {/* VERIFICATION */}
+
         <div className="bg-white p-6 rounded-2xl shadow-sm">
 
           <div className="flex items-center justify-between">
@@ -251,6 +312,95 @@ const BrokerDashboard = () => {
 
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* =========================
+          QUICK STATUS
+      ========================= */}
+
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+
+        <h2 className="text-xl font-bold text-[#041b3c] mb-5">
+          Account Status
+        </h2>
+
+        <div className="space-y-4">
+
+          {/* PROFILE */}
+
+          <div className="flex items-center justify-between">
+
+            <span className="text-gray-500">
+              Profile Submitted
+            </span>
+
+            <CheckCircle2
+              className="text-green-500"
+              size={20}
+            />
+
+          </div>
+
+          {/* VERIFICATION */}
+
+          <div className="flex items-center justify-between">
+
+            <span className="text-gray-500">
+              Admin Verification
+            </span>
+
+            {verificationStatus === "approved" ? (
+
+              <CheckCircle2
+                className="text-green-500"
+                size={20}
+              />
+
+            ) : verificationStatus === "pending" ? (
+
+              <Clock3
+                className="text-yellow-500"
+                size={20}
+              />
+
+            ) : (
+
+              <XCircle
+                className="text-red-500"
+                size={20}
+              />
+
+            )}
+
+          </div>
+
+          {/* ACCESS */}
+
+          <div className="flex items-center justify-between">
+
+            <span className="text-gray-500">
+              Broker Access
+            </span>
+
+            {verificationStatus === "approved" ? (
+
+              <CheckCircle2
+                className="text-green-500"
+                size={20}
+              />
+
+            ) : (
+
+              <XCircle
+                className="text-red-400"
+                size={20}
+              />
+
+            )}
+
+          </div>
+
         </div>
       </div>
     </div>

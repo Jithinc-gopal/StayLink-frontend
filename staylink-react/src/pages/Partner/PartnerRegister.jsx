@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import {
   useLocation,
   useNavigate,
@@ -12,12 +13,15 @@ import {
   Lock,
   User,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
 
 import { registerPartner } from "../../services/authService";
 
 const PartnerRegister = () => {
+
   const navigate = useNavigate();
+
   const location = useLocation();
 
   /* ====================================================== */
@@ -31,9 +35,13 @@ const PartnerRegister = () => {
   /* ====================================================== */
 
   useEffect(() => {
+
     if (!selectedRole) {
+
       navigate("/join-our-team");
+
     }
+
   }, [selectedRole, navigate]);
 
   /* ====================================================== */
@@ -42,13 +50,22 @@ const PartnerRegister = () => {
 
   const [loading, setLoading] = useState(false);
 
+  const [message, setMessage] = useState("");
+
+  const [success, setSuccess] = useState(false);
+
   const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
+
     first_name: "",
+
     email: "",
+
     password: "",
+
     confirm_password: "",
+
   });
 
   /* ====================================================== */
@@ -56,10 +73,15 @@ const PartnerRegister = () => {
   /* ====================================================== */
 
   const handleChange = (e) => {
+
     setForm({
+
       ...form,
+
       [e.target.id]: e.target.value,
+
     });
+
   };
 
   /* ====================================================== */
@@ -67,7 +89,12 @@ const PartnerRegister = () => {
   /* ====================================================== */
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
+
+    // =========================
+    // VALIDATION
+    // =========================
 
     if (
       !form.first_name ||
@@ -75,54 +102,153 @@ const PartnerRegister = () => {
       !form.password ||
       !form.confirm_password
     ) {
-      alert("Please fill all fields");
+
+      setSuccess(false);
+
+      setMessage(
+        "Please fill all fields"
+      );
+
       return;
     }
 
-    if (form.password !== form.confirm_password) {
-      alert("Passwords do not match");
+    if (
+      form.password !==
+      form.confirm_password
+    ) {
+
+      setSuccess(false);
+
+      setMessage(
+        "Passwords do not match"
+      );
+
       return;
     }
+
+    // =========================
+    // PAYLOAD
+    // =========================
 
     const payload = {
+
       first_name: form.first_name,
+
       email: form.email,
+
       password: form.password,
-      confirm_password: form.confirm_password,
+
+      confirm_password:
+        form.confirm_password,
+
       role: selectedRole,
     };
 
     try {
+
       setLoading(true);
 
-      const res = await registerPartner(payload);
+      setMessage("");
 
-      const { user, access, refresh } = res.data;
+      // =========================
+      // API CALL
+      // =========================
 
-      /* SAVE TOKENS */
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("access", access);
-      localStorage.setItem("refresh", refresh);
+      const res =
+        await registerPartner(
+          payload
+        );
 
-      /* ROLE BASED REDIRECT */
-      if (user.role === "owner") {
-        navigate("/owner/setup");
-      }
-
-      else if (user.role === "broker") {
-        navigate("/broker/setup");
-      }
-
-    } catch (err) {
-      console.error(err.response?.data);
-
-      alert(
-        err.response?.data?.detail ||
-        "Registration failed"
+      console.log(
+        "REGISTER RESPONSE:",
+        res.data
       );
 
+      // =========================
+      // SAVE EMAIL TEMPORARILY
+      // =========================
+
+      localStorage.setItem(
+        "verification_email",
+        form.email
+      );
+
+      // =========================
+      // SUCCESS MESSAGE
+      // =========================
+
+      setSuccess(true);
+
+      setMessage(
+        res.data.message ||
+        "Verification code sent to your email"
+      );
+
+      // =========================
+      // REDIRECT TO VERIFY PAGE
+      // =========================
+
+      setTimeout(() => {
+
+        navigate("/verify-code");
+
+      }, 2000);
+
+    } catch (err) {
+
+      console.log(
+        "FULL ERROR:",
+        err
+      );
+
+      console.log(
+        "ERROR RESPONSE:",
+        err.response
+      );
+
+      console.log(
+        "ERROR DATA:",
+        err.response?.data
+      );
+
+      setSuccess(false);
+
+      // =========================
+      // ERROR MESSAGE
+      // =========================
+
+      if (
+        err.response?.data?.email
+      ) {
+
+        setMessage(
+          err.response.data.email[0]
+        );
+
+      }
+
+      else if (
+        err.response?.data?.error
+      ) {
+
+        setMessage(
+          err.response.data.error
+        );
+
+      }
+
+      else {
+
+        setMessage(
+          "Registration failed"
+        );
+
+      }
+
     } finally {
+
       setLoading(false);
+
     }
   };
 
@@ -131,8 +257,11 @@ const PartnerRegister = () => {
   /* ====================================================== */
 
   const roleLabel =
+
     selectedRole === "owner"
+
       ? "Property Owner"
+
       : "Broker";
 
   /* ====================================================== */
@@ -140,6 +269,7 @@ const PartnerRegister = () => {
   /* ====================================================== */
 
   return (
+
     <div className="min-h-screen bg-[#f1f3ff] flex items-center justify-center p-4">
 
       <main className="w-full max-w-6xl h-full max-h-[760px] flex flex-col lg:flex-row overflow-hidden bg-[#f9f9ff] rounded-[2.5rem] shadow-2xl shadow-[#003d9b]/5">
@@ -151,6 +281,7 @@ const PartnerRegister = () => {
         <section className="hidden lg:flex lg:w-[42%] relative p-10 flex-col justify-end overflow-hidden">
 
           {/* BACKGROUND IMAGE */}
+
           <div className="absolute inset-0 z-0">
 
             <img
@@ -164,9 +295,11 @@ const PartnerRegister = () => {
           </div>
 
           {/* CONTENT */}
+
           <div className="relative z-10 text-white">
 
             {/* BADGE */}
+
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm text-sm font-semibold mb-6">
 
               <ShieldCheck size={16} />
@@ -176,6 +309,7 @@ const PartnerRegister = () => {
             </div>
 
             {/* TITLE */}
+
             <h1 className="text-4xl font-extrabold leading-tight">
 
               Become a Verified
@@ -186,6 +320,7 @@ const PartnerRegister = () => {
             </h1>
 
             {/* DESCRIPTION */}
+
             <p className="mt-5 text-[#dbe6ff] leading-relaxed text-sm max-w-md">
 
               Create your professional StayLink partner account and
@@ -194,34 +329,49 @@ const PartnerRegister = () => {
             </p>
 
             {/* FEATURES */}
+
             <div className="mt-10 space-y-4">
 
               <div className="flex items-center gap-3">
+
                 <div className="w-2 h-2 rounded-full bg-white"></div>
 
                 <span className="text-sm">
+
                   Professional dashboard access
+
                 </span>
+
               </div>
 
               <div className="flex items-center gap-3">
+
                 <div className="w-2 h-2 rounded-full bg-white"></div>
 
                 <span className="text-sm">
+
                   Verification & approval system
+
                 </span>
+
               </div>
 
               <div className="flex items-center gap-3">
+
                 <div className="w-2 h-2 rounded-full bg-white"></div>
 
                 <span className="text-sm">
+
                   Secure partner onboarding
+
                 </span>
+
               </div>
 
             </div>
+
           </div>
+
         </section>
 
         {/* ====================================================== */}
@@ -231,18 +381,22 @@ const PartnerRegister = () => {
         <section className="flex-1 flex flex-col justify-center p-8 lg:px-20 overflow-y-auto">
 
           {/* BACK BUTTON */}
+
           <div className="w-full max-w-md mb-6">
 
             <Link
               to="/join-our-team"
               className="text-sm text-[#003d9b] font-semibold hover:underline"
             >
+
               ← Back
+
             </Link>
 
           </div>
 
           {/* HEADING */}
+
           <div className="w-full max-w-md mb-8">
 
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#eef4ff] text-[#003d9b] text-sm font-semibold mb-5">
@@ -265,15 +419,18 @@ const PartnerRegister = () => {
               to continue the verification process.
 
             </p>
+
           </div>
 
           {/* FORM */}
+
           <form
             onSubmit={handleSubmit}
             className="w-full max-w-md space-y-5"
           >
 
             {/* FULL NAME */}
+
             <div className="relative">
 
               <User
@@ -289,9 +446,11 @@ const PartnerRegister = () => {
                 onChange={handleChange}
                 className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[#f1f3ff] border border-transparent focus:border-[#003d9b] outline-none text-sm"
               />
+
             </div>
 
             {/* EMAIL */}
+
             <div className="relative">
 
               <Mail
@@ -307,9 +466,11 @@ const PartnerRegister = () => {
                 onChange={handleChange}
                 className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[#f1f3ff] border border-transparent focus:border-[#003d9b] outline-none text-sm"
               />
+
             </div>
 
             {/* PASSWORD */}
+
             <div className="relative">
 
               <Lock
@@ -319,7 +480,11 @@ const PartnerRegister = () => {
 
               <input
                 id="password"
-                type={showPassword ? "text" : "password"}
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
                 placeholder="Password"
                 value={form.password}
                 onChange={handleChange}
@@ -328,18 +493,26 @@ const PartnerRegister = () => {
 
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() =>
+                  setShowPassword(
+                    !showPassword
+                  )
+                }
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
               >
+
                 {showPassword ? (
                   <EyeOff size={18} />
                 ) : (
                   <Eye size={18} />
                 )}
+
               </button>
+
             </div>
 
             {/* CONFIRM PASSWORD */}
+
             <div className="relative">
 
               <Lock
@@ -355,24 +528,68 @@ const PartnerRegister = () => {
                 onChange={handleChange}
                 className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[#f1f3ff] border border-transparent focus:border-[#003d9b] outline-none text-sm"
               />
+
             </div>
 
+            {/* MESSAGE */}
+
+            {message && (
+
+              <div
+                className={`
+                  text-sm
+                  font-medium
+                  text-center
+                  ${
+                    success
+                      ? "text-green-600"
+                      : "text-red-500"
+                  }
+                `}
+              >
+
+                {message}
+
+              </div>
+
+            )}
+
             {/* BUTTON */}
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#003d9b] to-[#0052cc] text-white font-bold hover:opacity-95 transition-all shadow-xl shadow-[#003d9b]/20"
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#003d9b] to-[#0052cc] text-white font-bold hover:opacity-95 transition-all shadow-xl shadow-[#003d9b]/20 flex items-center justify-center gap-2"
             >
 
-              {loading
-                ? "Creating Account..."
-                : `Continue as ${roleLabel}`}
+              {loading ? (
+                <>
+
+                  <Loader2
+                    className="animate-spin"
+                    size={20}
+                  />
+
+                  Creating Account...
+
+                </>
+              ) : (
+
+                <>
+                  <ShieldCheck size={18} />
+
+                  Continue as {roleLabel}
+
+                </>
+
+              )}
 
             </button>
 
           </form>
 
           {/* LOGIN */}
+
           <div className="mt-6 w-full max-w-md text-center">
 
             <p className="text-sm text-[#5c6070]">
@@ -383,20 +600,27 @@ const PartnerRegister = () => {
                 to="/login"
                 className="text-[#003d9b] font-bold ml-1 hover:underline"
               >
+
                 Sign In
+
               </Link>
 
             </p>
+
           </div>
 
           {/* FOOTER */}
+
           <div className="mt-auto pt-8 text-center text-xs text-[#7c8195]">
 
             © 2026 StayLink. All rights reserved.
 
           </div>
+
         </section>
+
       </main>
+
     </div>
   );
 };
