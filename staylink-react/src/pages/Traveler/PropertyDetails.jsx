@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 import {
   getPublicPropertyDetails,
@@ -8,7 +8,11 @@ import {
 
 import {
   getPropertyCalendar,
+  createBookingOrder,
+  verifyPayment,
 } from "../../services/bookingService";
+
+import { startConversation } from "../../services/chatService";
 
 import {
   DateRange
@@ -22,6 +26,10 @@ import "react-date-range/dist/theme/default.css";
 const PropertyDetails = () => {
 
   const { id } = useParams();
+
+  const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem("user"));
 
   // =====================================
   // STATE
@@ -50,6 +58,25 @@ const PropertyDetails = () => {
         key: "selection",
       },
     ]);
+
+  const [isBooking, setIsBooking] =
+    useState(false);
+
+  const [guestsCount, setGuestsCount] =
+    useState(1);
+
+  const [specialRequest, setSpecialRequest] =
+    useState("");
+
+  // =====================================
+  // BOOKING MODAL STATE
+  // showBookingModal: controls the guest
+  // details modal visibility before payment
+  // =====================================
+
+  const [showBookingModal, setShowBookingModal] =
+    useState(false);
+
 
   // =====================================
   // LOAD PROPERTY
@@ -194,6 +221,205 @@ const PropertyDetails = () => {
 
 
   // =====================================
+  // FORMAT DATE → "YYYY-MM-DD"
+  // =====================================
+
+  const formatDate = (date) => {
+
+    const year = date.getFullYear();
+
+    const month =
+      String(date.getMonth() + 1).padStart(2, "0");
+
+    const day =
+      String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+
+  // =====================================
+  // STEP 1 — RESERVE BUTTON CLICKED
+  // Validates login + dates, then opens
+  // the booking details modal
+  // =====================================
+
+  const handleReserveClick = () => {
+
+    // Redirect to login if not authenticated
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    // Validate dates are actually selected
+    const startDate = selection[0].startDate;
+    const endDate = selection[0].endDate;
+
+    if (
+      !startDate ||
+      !endDate ||
+      startDate.toDateString() === endDate.toDateString()
+    ) {
+      alert("Please select check-in and check-out dates.");
+      return;
+    }
+
+    // ✅ Dates valid — open the booking details modal
+    setShowBookingModal(true);
+  };
+
+
+  // =====================================
+  // STEP 2 — CONFIRM BOOKING MODAL
+  // Called when traveler clicks
+  // "Proceed to Payment" inside the modal
+  // =====================================
+
+  const handleProceedToPayment = async () => {
+
+    if (guestsCount < 1) {
+      alert("Guests count must be at least 1.");
+      return;
+    }
+
+    if (guestsCount > property.max_guest) {
+      alert(`Maximum ${property.max_guest} guests allowed.`);
+      return;
+    }
+
+    setShowBookingModal(false);
+    setIsBooking(true);
+
+    const startDate = selection[0].startDate;
+    const endDate = selection[0].endDate;
+
+    try {
+
+      // ── STEP 2: Create hold booking + Razorpay order ──────────────────
+      const orderData = await createBookingOrder({
+        property: property.id,
+        check_in: formatDate(startDate),
+        check_out: formatDate(endDate),
+        guests_count: guestsCount,
+        special_request: specialRequest || "",
+      });
+
+      const {
+        booking_id,
+        razorpay_order_id,
+        razorpay_key_id,
+        amount_paise,
+        nights,
+      } = orderData;
+
+      // ── STEP 3: Open Razorpay payment popup ───────────────────────────
+      const options = {
+
+        key: razorpay_key_id,
+
+        amount: amount_paise,
+
+        currency: "INR",
+
+        name: "StayLink",
+
+        description: `${nights} night(s) at ${property.title}`,
+
+        order_id: razorpay_order_id,
+
+        handler: async function (razorpayResponse) {
+
+          // ── STEP 4: Verify payment signature on backend ──────────────
+          try {
+
+            const verifyData = await verifyPayment({
+              razorpay_order_id:
+                razorpayResponse.razorpay_order_id,
+              razorpay_payment_id:
+                razorpayResponse.razorpay_payment_id,
+              razorpay_signature:
+                razorpayResponse.razorpay_signature,
+            });
+
+            // ✅ Success — navigate to confirmation page
+            navigate(
+              `/booking-confirmed/${verifyData.booking_id}`
+            );
+
+          } catch (verifyError) {
+
+            console.error("Payment verify error:", verifyError);
+
+            alert(
+              `Payment verification failed. Please contact support.\nYour Booking ID: ${booking_id}`
+            );
+
+            setIsBooking(false);
+          }
+        },
+
+        prefill: {
+          name: user?.full_name || user?.name || "",
+          email: user?.email || "",
+          contact: user?.phone || "",
+        },
+
+        theme: {
+          color: "#000000",
+        },
+
+        modal: {
+          ondismiss: function () {
+            alert(
+              `Payment cancelled. Your booking (ID: ${booking_id}) is on hold for 10 minutes.`
+            );
+            setIsBooking(false);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+
+      rzp.open();
+
+    } catch (err) {
+
+      console.error("Booking error:", err);
+
+      const errorMessage =
+        err.response?.data?.error ||
+        "Booking failed. Please try again.";
+
+      alert(errorMessage);
+
+      setIsBooking(false);
+    }
+  };
+
+
+
+
+  const handleStartChat = async () => {
+  if (!user) {
+    navigate("/login");
+    return;
+  }
+
+  try {
+    const res = await startConversation(property.id);
+
+    const conversationId = res.data.conversation_id;
+
+    navigate(`/chat/${conversationId}`);
+  } catch (error) {
+    console.log("Chat start error:", error);
+    alert("Unable to start chat");
+  }
+};
+
+
+  // =====================================
   // LOADING
   // =====================================
 
@@ -234,6 +460,163 @@ const PropertyDetails = () => {
   return (
 
     <div className="max-w-7xl mx-auto p-6">
+
+      {/* ================================= */}
+      {/* BOOKING DETAILS MODAL */}
+      {/* Shows between Reserve click and  */}
+      {/* Razorpay popup                   */}
+      {/* ================================= */}
+
+      {showBookingModal && (
+
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
+
+            {/* MODAL HEADER */}
+
+            <div className="flex justify-between items-center mb-6">
+
+              <h2 className="text-2xl font-bold">
+
+                Booking Details
+
+              </h2>
+
+              <button
+                onClick={() => setShowBookingModal(false)}
+                className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
+              >
+                ✕
+              </button>
+
+            </div>
+
+
+            {/* BOOKING SUMMARY */}
+
+            <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2 text-sm">
+
+              <div className="flex justify-between">
+                <span className="text-gray-500">Check-in</span>
+                <span className="font-semibold">
+                  {formatDate(selection[0].startDate)}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-gray-500">Check-out</span>
+                <span className="font-semibold">
+                  {formatDate(selection[0].endDate)}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-gray-500">Nights</span>
+                <span className="font-semibold">
+                  {calculateNights()}
+                </span>
+              </div>
+
+              <div className="border-t pt-2 flex justify-between">
+                <span className="text-gray-500">Total Amount</span>
+                <span className="font-semibold">
+                  ₹ {calculateTotal()}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-gray-500">Advance to Pay (now)</span>
+                <span className="font-bold text-black">
+                  ₹ {calculateAdvance()}
+                </span>
+              </div>
+
+            </div>
+
+
+            {/* GUESTS COUNT */}
+
+            <div className="mb-4">
+
+              <label className="block text-sm font-semibold mb-2">
+
+                Number of Guests
+
+                <span className="text-gray-400 font-normal ml-1">
+                  (max {property.max_guest})
+                </span>
+
+              </label>
+
+              <input
+                type="number"
+                min="1"
+                max={property.max_guest}
+                value={guestsCount}
+                onChange={(e) =>
+                  setGuestsCount(
+                    Math.max(1, parseInt(e.target.value) || 1)
+                  )
+                }
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              />
+
+            </div>
+
+
+            {/* SPECIAL REQUEST */}
+
+            <div className="mb-6">
+
+              <label className="block text-sm font-semibold mb-2">
+
+                Special Request
+
+                <span className="text-gray-400 font-normal ml-1">
+                  (optional)
+                </span>
+
+              </label>
+
+              <textarea
+                rows={3}
+                placeholder="Any special requests for the owner..."
+                value={specialRequest}
+                onChange={(e) =>
+                  setSpecialRequest(e.target.value)
+                }
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+              />
+
+            </div>
+
+
+            {/* MODAL BUTTONS */}
+
+            <div className="flex gap-3">
+
+              <button
+                onClick={() => setShowBookingModal(false)}
+                className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleProceedToPayment}
+                className="flex-1 bg-black text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition"
+              >
+                Proceed to Payment
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
 
       {/* ================================= */}
       {/* PROPERTY TITLE */}
@@ -497,10 +880,20 @@ const PropertyDetails = () => {
           {/* RESERVE BUTTON */}
 
           <button
-            className="w-full mt-6 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition"
+            onClick={handleReserveClick}
+            disabled={isBooking}
+            className="w-full mt-6 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Reserve
+            {isBooking ? "Processing..." : "Reserve"}
           </button>
+
+          {/* CHAT WITH OWNER BUTTON */}
+         <button
+  onClick={handleStartChat}
+  className="w-full mt-3 border-2 border-black text-black py-3 rounded-xl hover:bg-gray-50 transition font-semibold"
+>
+  💬 Chat with Owner
+</button>
 
         </div>
 

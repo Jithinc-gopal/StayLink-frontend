@@ -26,6 +26,7 @@ import EditProperty from
 import OwnerPropertyCalendarPage from
   "../pages/Owner/OwnerPropertyCalendarPage";
 
+import OwnerPropertyConversations from "../pages/owner/OwnerPropertyConversations";
 
 const OwnerRoutes = () => {
 
@@ -123,6 +124,10 @@ const OwnerRoutes = () => {
           </ProtectedRoute>
         }
       />
+<Route
+  path="/owner/properties/:propertyId/conversations"
+  element={<OwnerPropertyConversations />}
+/>
 
     </>
   );

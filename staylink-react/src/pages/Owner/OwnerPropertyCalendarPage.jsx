@@ -29,6 +29,7 @@ const OwnerPropertyCalendarPage = () => {
   const fetchCalendar = async () => {
     try {
       const data = await getOwnerPropertyCalendar(propertyId);
+      console.log("API DATA:", data);
       setCalendarData(data);
     } catch (error) {
       console.log("Calendar error:", error);

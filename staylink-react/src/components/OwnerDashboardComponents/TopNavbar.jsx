@@ -5,6 +5,7 @@ import { logoutUser, getOwnerProfile } from "../../services/authService";
 const TopNavbar = ({ onSearch }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [profile, setProfile] = useState(null);
+
   const navigate = useNavigate();
   const dropdownRef = useRef();
 
@@ -18,25 +19,45 @@ const TopNavbar = ({ onSearch }) => {
         console.error("Navbar profile error:", err);
       }
     };
+
     fetchProfile();
   }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
         setShowDropdown(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+    return () =>
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
   }, []);
 
   const handleLogout = async () => {
     try {
-      const refresh = localStorage.getItem("refresh");
-      if (refresh) await logoutUser(refresh);
+      const refresh =
+        localStorage.getItem("refresh");
+
+      if (refresh) {
+        await logoutUser(refresh);
+      }
     } catch (err) {
-      console.error("Logout error:", err?.response?.data);
+      console.error(
+        "Logout error:",
+        err?.response?.data
+      );
     } finally {
       localStorage.clear();
       navigate("/login");
@@ -46,10 +67,13 @@ const TopNavbar = ({ onSearch }) => {
   return (
     <header className="fixed top-0 left-0 right-0 z-[1000] bg-white border-b border-slate-200 shadow-sm">
       <div className="flex items-center justify-between px-6 md:px-8 py-3 w-full">
+
         {/* LEFT */}
         <div
           className="text-xl font-bold text-slate-800 cursor-pointer hover:text-slate-600 transition-colors"
-          onClick={() => navigate("/owner/dashboard")}
+          onClick={() =>
+            navigate("/owner/dashboard")
+          }
         >
           StayLink
         </div>
@@ -60,10 +84,13 @@ const TopNavbar = ({ onSearch }) => {
             <span className="material-symbols-outlined text-slate-400 text-lg">
               search
             </span>
+
             <input
               type="text"
               placeholder="Search properties..."
-              onChange={(e) => onSearch?.(e.target.value)}
+              onChange={(e) =>
+                onSearch?.(e.target.value)
+              }
               className="bg-transparent outline-none ml-3 w-full text-sm text-slate-700 placeholder:text-slate-400"
             />
           </div>
@@ -71,6 +98,7 @@ const TopNavbar = ({ onSearch }) => {
 
         {/* RIGHT */}
         <div className="flex items-center gap-3">
+
           {/* Notification */}
           <button className="relative p-2 rounded-full hover:bg-slate-100 transition-colors">
             <span className="material-symbols-outlined text-slate-600 text-xl">
@@ -78,8 +106,24 @@ const TopNavbar = ({ onSearch }) => {
             </span>
           </button>
 
+          {/* Chat Inbox */}
+          <button
+            onClick={() =>
+              navigate("/owner/chats")
+            }
+            className="relative p-2 rounded-full hover:bg-slate-100 transition-colors"
+            title="Chats"
+          >
+            <span className="material-symbols-outlined text-slate-600 text-xl">
+              chat
+            </span>
+          </button>
+
           {/* Profile + Dropdown */}
-          <div className="relative" ref={dropdownRef}>
+          <div
+            className="relative"
+            ref={dropdownRef}
+          >
             <img
               src={
                 profile?.profile_image
@@ -88,32 +132,45 @@ const TopNavbar = ({ onSearch }) => {
               }
               alt="profile"
               className="h-10 w-10 rounded-full cursor-pointer border-2 border-slate-200 object-cover hover:border-slate-400 transition-all"
-              onClick={() => setShowDropdown((prev) => !prev)}
+              onClick={() =>
+                setShowDropdown(
+                  (prev) => !prev
+                )
+              }
             />
 
             {showDropdown && (
               <div className="absolute right-0 top-12 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-[2000] overflow-hidden">
+
                 <button
-                  onClick={() => navigate("/owner/profile")}
+                  onClick={() =>
+                    navigate("/owner/profile")
+                  }
                   className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-sm font-medium text-slate-700 transition-colors"
                 >
                   Profile
                 </button>
+
                 <button
-                  onClick={() => navigate("/owner/settings")}
+                  onClick={() =>
+                    navigate("/owner/settings")
+                  }
                   className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-sm font-medium text-slate-700 transition-colors border-t border-slate-100"
                 >
                   Settings
                 </button>
+
                 <button
                   onClick={handleLogout}
                   className="w-full text-left px-4 py-2.5 hover:bg-red-50 text-sm font-medium text-red-600 transition-colors border-t border-slate-100"
                 >
                   Logout
                 </button>
+
               </div>
             )}
           </div>
+
         </div>
       </div>
     </header>

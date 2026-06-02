@@ -18,6 +18,7 @@ const OwnerCalendar = ({
   // =========================
 
   if (!calendarData) {
+    console.log(calendarData);
 
     return (
 
@@ -51,25 +52,32 @@ const OwnerCalendar = ({
   // BOOKINGS
   // =========================
 
-  const bookingEvents =
-    bookings.map((b) => ({
+ const bookingEvents =
+  bookings.map((b) => ({
 
-      id: `booking-${b.id}`,
+    id: `booking-${b.id}`,
 
-      title: "Booked",
+    title: `🏠 ${b.traveler_name}`,
 
-      start: b.check_in,
+    start: b.check_in,
 
-      end: b.check_out,
+    end: b.check_out,
 
-      color: "#ef4444",
+    color: "#ef4444",
 
-      editable: false,
+    editable: false,
 
-      display: "block",
+    display: "block",
 
-      className: "booking-event",
-    }));
+    extendedProps: {
+
+      isBooking: true,
+
+      traveler: b.traveler_name,
+
+      status: b.status,
+    }
+  }));
 
   // =========================
   // SORT BLOCKED DATES
