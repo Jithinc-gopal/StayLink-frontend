@@ -6,6 +6,8 @@ import JoinOurTeamPreview from "../../components/LandingpageComponents/JoinOurTe
 import Footer from "../../components/LandingpageComponents/Footer";
 import AIChatButton from "../../components/LandingpageComponents/AIChatButton";
 import Navbar from "../../components/LandingpageComponents/Navbar";
+import ApprovedBrokers from "../../components/LandingpageComponents/ApprovedBrokers";
+
 
 export default function Landing() {
     return (
@@ -19,6 +21,7 @@ export default function Landing() {
                 <RefinedCategories />
 
                 <FeaturedExperiences />
+                <ApprovedBrokers />
 
                 <TrustIndicators />
 
@@ -28,7 +31,7 @@ export default function Landing() {
 
             <Footer />
 
-            <AIChatButton />
+             <AIChatButton />
         </div>
     );
 }

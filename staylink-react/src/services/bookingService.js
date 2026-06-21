@@ -85,3 +85,21 @@ export const getMyBookings = async () => {
 
   return response.data;
 };
+
+
+export const createReview = async (bookingId, data) => {
+  const response = await API.post(
+    `/api/traveler/bookings/${bookingId}/review/`,
+    data
+  );
+
+  return response.data;
+};
+
+export const getPropertyReviews = async (propertyId) => {
+  const response = await API.get(
+    `/api/traveler/properties/${propertyId}/reviews/`
+  );
+
+  return response.data;
+};

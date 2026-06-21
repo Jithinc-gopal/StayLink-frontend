@@ -281,3 +281,20 @@ export const getPublicPropertyDetails = (
 
   );
 };
+
+export const getOwnerPropertyBookings = async (propertyId) => {
+  const response = await API.get(
+    `/api/owner/properties/${propertyId}/bookings/`
+  );
+
+  return response.data;
+};
+
+export const completeOwnerBooking = async (bookingId) => {
+  const response = await API.post(
+    `/api/owner/bookings/${bookingId}/complete/`
+  );
+
+  return response.data;
+};
+

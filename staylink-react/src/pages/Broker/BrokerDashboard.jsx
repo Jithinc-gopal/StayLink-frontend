@@ -1,409 +1,259 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import BrokerLayout from "../../components/BrokerComponents/BrokerLayout";
+
 import {
-  Clock3,
-  CheckCircle2,
-  XCircle,
+  getBrokerDashboardStats,
+} from "../../services/brokerService";
+
+import {
   Building2,
   Users,
-  ShieldCheck,
+  Star,
+  CalendarCheck,
+  IndianRupee,
+  Bell,
+  Plus,
+  UserRound,
+  NotebookPen,
+  ArrowRight,
+  Loader2,
 } from "lucide-react";
 
-import {
-  getBrokerProfile,
-} from "../../services/authService";
-
 const BrokerDashboard = () => {
-
   const navigate = useNavigate();
 
+  const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const [verificationStatus, setVerificationStatus] =
-    useState("pending");
-
-  // =========================
-  // FETCH BROKER PROFILE
-  // =========================
+  const loadDashboard = async () => {
+    try {
+      setLoading(true);
+      const res = await getBrokerDashboardStats();
+      setDashboard(res.data);
+    } catch (error) {
+      console.error("Broker dashboard error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-
-    const fetchProfile = async () => {
-
-      try {
-
-        const response = await getBrokerProfile();
-
-        console.log(response.data);
-
-        setVerificationStatus(
-          response.data.verification_status
-        );
-
-      } catch (error) {
-
-        console.log(error);
-
-        // =========================
-        // PROFILE NOT CREATED
-        // =========================
-
-        if (
-          error.response &&
-          error.response.status === 404
-        ) {
-
-          navigate("/broker/create-profile");
-
-        }
-
-      } finally {
-
-        setLoading(false);
-
-      }
-    };
-
-    fetchProfile();
-
-  }, [navigate]);
-
-  // =========================
-  // LOADING SCREEN
-  // =========================
+    loadDashboard();
+  }, []);
 
   if (loading) {
-
     return (
-
-      <div className="min-h-screen flex items-center justify-center bg-[#f1f3ff]">
-
-        <h1 className="text-xl font-semibold text-[#041b3c]">
-          Loading Dashboard...
-        </h1>
-
-      </div>
+      <BrokerLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="animate-spin text-slate-500" size={34} />
+        </div>
+      </BrokerLayout>
     );
   }
 
+  if (!dashboard) {
+    return (
+      <BrokerLayout>
+        <div className="bg-white border rounded-2xl p-8 text-center">
+          <h2 className="text-xl font-bold">Unable to load dashboard</h2>
+          <button
+            onClick={loadDashboard}
+            className="mt-4 px-5 py-2 rounded-xl bg-slate-900 text-white"
+          >
+            Retry
+          </button>
+        </div>
+      </BrokerLayout>
+    );
+  }
+
+  const { profile, stats } = dashboard;
+
   return (
+    <BrokerLayout>
+      <div className="space-y-8">
 
-    <div className="min-h-screen bg-[#f1f3ff] p-6">
-
-      {/* =========================
-          HEADER
-      ========================= */}
-
-      <div className="mb-8">
-
-        <h1 className="text-4xl font-bold text-[#041b3c]">
-          Broker Dashboard
-        </h1>
-
-        <p className="text-gray-500 mt-2">
-          Manage your listings and clients
-        </p>
-
-      </div>
-
-      {/* =========================
-          PENDING BANNER
-      ========================= */}
-
-      {verificationStatus === "pending" && (
-
-        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 mb-8">
-
-          <div className="flex items-start gap-4">
-
-            <div className="bg-yellow-100 p-3 rounded-full">
-
-              <Clock3
-                className="text-yellow-600"
-                size={28}
-              />
-
-            </div>
-
+        {/* WELCOME */}
+        <section className="bg-slate-900 rounded-3xl p-8 text-white shadow-xl">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-
-              <h2 className="text-xl font-bold text-yellow-800">
-                Verification Pending
-              </h2>
-
-              <p className="text-yellow-700 mt-2 max-w-2xl">
-                Your broker profile is under admin review.
-                Once approved you can access all
-                broker features.
+              <p className="text-slate-300 text-sm">Broker Dashboard</p>
+              <h1 className="text-3xl md:text-4xl font-bold mt-2">
+                Welcome, {profile?.agency_name || profile?.first_name || "Broker"}
+              </h1>
+              <p className="text-slate-300 mt-2 max-w-2xl">
+                Manage unlisted stays, track client bookings, monitor commissions,
+                and handle broker connections from one place.
               </p>
 
-              <button className="mt-4 bg-yellow-600 text-white px-5 py-2 rounded-lg font-medium cursor-not-allowed">
-
-                Verification In Progress
-
-              </button>
-
+              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/15 text-green-300 text-sm font-medium">
+                Verified Status: {profile?.verification_status}
+              </div>
             </div>
+
+            <button
+              onClick={() => navigate("/broker/profile")}
+              className="flex items-center justify-center gap-2 bg-white text-slate-900 px-5 py-3 rounded-2xl font-semibold hover:bg-slate-100 transition"
+            >
+              <UserRound size={18} />
+              Go to Profile
+            </button>
           </div>
-        </div>
-      )}
+        </section>
 
-      {/* =========================
-          APPROVED BANNER
-      ========================= */}
+        {/* STATS */}
+        <QuickAction
+        icon={Users}
+        title="View Chats"
+        text="Reply to traveler broker chat messages."
+        onClick={() => navigate("/broker/chats")}
+/>
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <StatCard
+            icon={Building2}
+            title="Unlisted Properties"
+            value={stats?.total_properties || 0}
+            subtitle={`${stats?.active_properties || 0} active`}
+          />
 
-      {verificationStatus === "approved" && (
+          <StatCard
+            icon={Users}
+            title="Connections"
+            value={stats?.total_connections || 0}
+            subtitle={`${stats?.pending_sent || 0} pending sent`}
+          />
 
-        <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-8">
+          <StatCard
+            icon={Star}
+            title="Reviews"
+            value={stats?.total_reviews || 0}
+            subtitle={`Avg rating: ${stats?.average_rating || "No rating"}`}
+          />
 
-          <div className="flex items-start gap-4">
+          <StatCard
+            icon={CalendarCheck}
+            title="Bookings Tracked"
+            value={stats?.total_bookings || 0}
+            subtitle={`${stats?.completed_bookings || 0} completed`}
+          />
+        </section>
 
-            <div className="bg-green-100 p-3 rounded-full">
+        {/* COMMISSION + ALERTS */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <InfoCard
+            icon={IndianRupee}
+            title="Commission Earned"
+            value={`₹${stats?.total_commission_earned || 0}`}
+            subtitle={`Pending commission: ₹${stats?.pending_commission || 0}`}
+          />
 
-              <CheckCircle2
-                className="text-green-600"
-                size={28}
-              />
+          <InfoCard
+            icon={Bell}
+            title="Notifications"
+            value={stats?.unread_notifications || 0}
+            subtitle="Unread notifications"
+            onClick={() => navigate("/broker/notifications")}
+          />
 
-            </div>
+          <InfoCard
+            icon={Users}
+            title="Pending Requests"
+            value={stats?.pending_received || 0}
+            subtitle="Incoming connection requests"
+            onClick={() => navigate("/broker/connections")}
+          />
+        </section>
 
+        {/* QUICK ACTIONS */}
+        <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+          <div className="flex items-center justify-between mb-5">
             <div>
-
-              <h2 className="text-xl font-bold text-green-800">
-                Profile Approved
+              <h2 className="text-xl font-bold text-slate-900">
+                Quick Actions
               </h2>
-
-              <p className="text-green-700 mt-2">
-                Your broker account is verified successfully.
-                You can now access all broker features.
+              <p className="text-sm text-slate-500">
+                Start your most common broker tasks quickly.
               </p>
-
             </div>
           </div>
-        </div>
-      )}
 
-      {/* =========================
-          REJECTED BANNER
-      ========================= */}
-
-      {verificationStatus === "rejected" && (
-
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-8">
-
-          <div className="flex items-start gap-4">
-
-            <div className="bg-red-100 p-3 rounded-full">
-
-              <XCircle
-                className="text-red-600"
-                size={28}
-              />
-
-            </div>
-
-            <div>
-
-              <h2 className="text-xl font-bold text-red-800">
-                Verification Rejected
-              </h2>
-
-              <p className="text-red-700 mt-2">
-                Your broker verification was rejected.
-                Please update your profile and resubmit.
-              </p>
-
-              <button
-                onClick={() =>
-                  navigate("/broker/profile")
-                }
-                className="mt-4 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-medium transition"
-              >
-
-                Update Profile
-
-              </button>
-
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* =========================
-          DASHBOARD CARDS
-      ========================= */}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-
-        {/* LISTINGS */}
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm">
-
-          <div className="flex items-center justify-between">
-
-            <div>
-
-              <p className="text-gray-500 text-sm">
-                My Listings
-              </p>
-
-              <h2 className="text-3xl font-bold mt-2">
-                0
-              </h2>
-
-            </div>
-
-            <div className="bg-blue-100 p-3 rounded-xl">
-
-              <Building2 className="text-blue-600" />
-
-            </div>
-          </div>
-        </div>
-
-        {/* CLIENTS */}
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm">
-
-          <div className="flex items-center justify-between">
-
-            <div>
-
-              <p className="text-gray-500 text-sm">
-                Clients
-              </p>
-
-              <h2 className="text-3xl font-bold mt-2">
-                0
-              </h2>
-
-            </div>
-
-            <div className="bg-green-100 p-3 rounded-xl">
-
-              <Users className="text-green-600" />
-
-            </div>
-          </div>
-        </div>
-
-        {/* VERIFICATION */}
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm">
-
-          <div className="flex items-center justify-between">
-
-            <div>
-
-              <p className="text-gray-500 text-sm">
-                Verification
-              </p>
-
-              <h2 className="text-lg font-semibold mt-2 capitalize">
-                {verificationStatus}
-              </h2>
-
-            </div>
-
-            <div className="bg-orange-100 p-3 rounded-xl">
-
-              <ShieldCheck className="text-orange-600" />
-
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* =========================
-          QUICK STATUS
-      ========================= */}
-
-      <div className="bg-white rounded-2xl shadow-sm p-6">
-
-        <h2 className="text-xl font-bold text-[#041b3c] mb-5">
-          Account Status
-        </h2>
-
-        <div className="space-y-4">
-
-          {/* PROFILE */}
-
-          <div className="flex items-center justify-between">
-
-            <span className="text-gray-500">
-              Profile Submitted
-            </span>
-
-            <CheckCircle2
-              className="text-green-500"
-              size={20}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <QuickAction
+              icon={Plus}
+              title="Add Unlisted Property"
+              text="Add offline/non-registered stay details."
+              onClick={() => navigate("/broker/properties")}
             />
 
+            <QuickAction
+              icon={NotebookPen}
+              title="Create Note"
+              text="Save private notes about clients or bookings."
+              onClick={() => navigate("/broker/notes")}
+            />
+
+            <QuickAction
+              icon={Users}
+              title="View Connections"
+              text="Manage connected travelers and owners."
+              onClick={() => navigate("/broker/connections")}
+            />
           </div>
-
-          {/* VERIFICATION */}
-
-          <div className="flex items-center justify-between">
-
-            <span className="text-gray-500">
-              Admin Verification
-            </span>
-
-            {verificationStatus === "approved" ? (
-
-              <CheckCircle2
-                className="text-green-500"
-                size={20}
-              />
-
-            ) : verificationStatus === "pending" ? (
-
-              <Clock3
-                className="text-yellow-500"
-                size={20}
-              />
-
-            ) : (
-
-              <XCircle
-                className="text-red-500"
-                size={20}
-              />
-
-            )}
-
-          </div>
-
-          {/* ACCESS */}
-
-          <div className="flex items-center justify-between">
-
-            <span className="text-gray-500">
-              Broker Access
-            </span>
-
-            {verificationStatus === "approved" ? (
-
-              <CheckCircle2
-                className="text-green-500"
-                size={20}
-              />
-
-            ) : (
-
-              <XCircle
-                className="text-red-400"
-                size={20}
-              />
-
-            )}
-
-          </div>
-
-        </div>
+        </section>
       </div>
+    </BrokerLayout>
+  );
+};
+
+const StatCard = ({ icon: Icon, title, value, subtitle }) => {
+  return (
+    <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm hover:shadow-md transition">
+      <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700">
+        <Icon size={22} />
+      </div>
+
+      <p className="text-sm text-slate-500 mt-4">{title}</p>
+      <h3 className="text-3xl font-bold text-slate-900 mt-1">{value}</h3>
+      <p className="text-xs text-slate-400 mt-1">{subtitle}</p>
     </div>
+  );
+};
+
+const InfoCard = ({ icon: Icon, title, value, subtitle, onClick }) => {
+  return (
+    <button
+      onClick={onClick}
+      className="text-left bg-white border border-slate-200 rounded-3xl p-6 shadow-sm hover:shadow-md transition"
+    >
+      <div className="flex items-center justify-between">
+        <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700">
+          <Icon size={22} />
+        </div>
+        {onClick && <ArrowRight size={18} className="text-slate-400" />}
+      </div>
+
+      <p className="text-sm text-slate-500 mt-4">{title}</p>
+      <h3 className="text-3xl font-bold text-slate-900 mt-1">{value}</h3>
+      <p className="text-xs text-slate-400 mt-1">{subtitle}</p>
+    </button>
+  );
+};
+
+const QuickAction = ({ icon: Icon, title, text, onClick }) => {
+  return (
+    <button
+      onClick={onClick}
+      className="text-left border border-slate-200 rounded-2xl p-5 hover:bg-slate-50 transition"
+    >
+      <div className="w-11 h-11 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+        <Icon size={20} />
+      </div>
+
+      <h3 className="font-bold text-slate-900 mt-4">{title}</h3>
+      <p className="text-sm text-slate-500 mt-1">{text}</p>
+    </button>
   );
 };
 

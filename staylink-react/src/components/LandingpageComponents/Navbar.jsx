@@ -103,25 +103,32 @@ export default function Navbar() {
   // ================= LOGOUT =================
 
   const handleLogout = async () => {
-    try {
-      const refresh = localStorage.getItem("refresh");
+  try {
+    const refresh = localStorage.getItem("refresh");
 
-      if (refresh) {
-        await logoutUser(refresh);
-      }
-    } catch (error) {
-      console.error(
-        "Logout error:",
-        error.response?.data
-      );
-    } finally {
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
-      localStorage.removeItem("user");
-
-      navigate("/login");
+    if (refresh && refresh !== "undefined" && refresh !== "null") {
+      await logoutUser({
+        refresh: refresh,
+      });
     }
-  };
+  } catch (error) {
+    console.error(
+      "Logout error:",
+      error.response?.data || error
+    );
+  } finally {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("user");
+    localStorage.removeItem("role");
+    localStorage.removeItem("isLoged");
+
+    setCurrentUser(null);
+    setOpen(false);
+
+    navigate("/login");
+  }
+};
 
   // ================= PROFILE IMAGE =================
 
@@ -201,6 +208,7 @@ export default function Navbar() {
                   }`
                 }
               >
+                
                 {({ isActive }) => (
                   <>
                     Experiences
@@ -210,6 +218,26 @@ export default function Navbar() {
                   </>
                 )}
               </NavLink>
+
+              <NavLink
+  to="/traveler/bookings"
+  className={({ isActive }) =>
+    `relative font-body tracking-wide transition-all duration-300 font-medium ${
+      isActive
+        ? "text-[#0052CC]"
+        : "text-[#4A5568] hover:text-[#172B4D]"
+    }`
+  }
+>
+  {({ isActive }) => (
+    <>
+      My Bookings
+      {isActive && (
+        <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-[#0052CC] rounded-full"></span>
+      )}
+    </>
+  )}
+</NavLink>
             </div>
           </div>
 

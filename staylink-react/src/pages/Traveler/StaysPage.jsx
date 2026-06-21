@@ -7,6 +7,8 @@ import {
 import Navbar from "../../components/LandingpageComponents/Navbar";
 
 import PropertyCard from "../../components/TravelerComponents/PropertyCard";
+import AIChatButton from "../../components/LandingpageComponents/AIChatButton";
+
 
 import {
   searchProperties,
@@ -175,6 +177,8 @@ export default function StaysPage() {
           </div>
 
         )}
+                     <AIChatButton />
+
 
       </div>
 
