@@ -75,8 +75,7 @@ export default function ApprovedBrokers() {
 
               <button
                 onClick={() =>
-                  navigate(`/traveler/brokers/${broker.id}`)
-                }
+                  navigate(`/traveler/brokers/${broker.id}`)}
                 className="mt-4 w-full bg-[#041b3c] text-white py-2 rounded-lg"
               >
                 View Profile

@@ -1,16 +1,10 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
-const ProtectedRoute = ({ children, allowedRoles }) => {
-  const location = useLocation();
-
+const PublicRoute = ({ children }) => {
   const token = localStorage.getItem("access");
   const user = JSON.parse(localStorage.getItem("user"));
 
-  if (!token || !user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  if (token && user) {
     if (user.role === "owner") {
       return <Navigate to="/owner/dashboard" replace />;
     }
@@ -25,4 +19,4 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   return children;
 };
 
-export default ProtectedRoute;
+export default PublicRoute;

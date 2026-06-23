@@ -118,7 +118,7 @@ const PropertyCard = ({ property }) => {
             className="group/btn relative overflow-hidden bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg"
           >
             <span className="relative z-10 flex items-center gap-2">
-              Manage
+              Edit
               <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent translate-x-full group-hover/btn:translate-x-0 transition-transform duration-500"></div>

@@ -293,19 +293,37 @@ const PropertyDetails = () => {
     }
   };
 
-  const handleStartChat = async () => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    try {
-      const data = await startConversation(property.id);
-      navigate(`/chat/${data.conversation_id}`);
-    } catch (error) {
-      console.error("Chat start error:", error);
-      alert(error.response?.data?.error || "Unable to start chat");
-    }
-  };
+const handleStartChat = async () => {
+  if (!user) {
+    navigate("/login");
+    return;
+  }
+
+  const propertyId = property?.id || id;
+
+  console.log("PROPERTY:", property);
+  console.log("PROPERTY ID:", propertyId);
+
+  if (!propertyId) {
+    alert("Property ID missing");
+    return;
+  }
+
+  try {
+    const data = await startConversation(propertyId);
+    navigate(`/chat/${data.conversation_id}`);
+  } catch (error) {
+    console.error(
+      "Chat start error:",
+      error.response?.data || error
+    );
+
+    alert(
+      error.response?.data?.error ||
+        "Unable to start chat"
+    );
+  }
+};
 
   const handleLike = () => setIsLiked(!isLiked);
 

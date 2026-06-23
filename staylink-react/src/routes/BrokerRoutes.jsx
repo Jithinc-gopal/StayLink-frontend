@@ -21,23 +21,8 @@ const BrokerRoutes = () => {
       <Route path="/broker/reviews" element={<ProtectedRoute allowedRoles={["broker"]}><BrokerReviews /></ProtectedRoute>} />
       <Route path="/broker/notes" element={<ProtectedRoute allowedRoles={["broker"]}><BrokerNotes /></ProtectedRoute>} />
       <Route path="/broker/notifications" element={<ProtectedRoute allowedRoles={["broker"]}><BrokerNotifications /></ProtectedRoute>} />
-      <Route
-  path="/broker/chats"
-  element={
-    <ProtectedRoute allowedRoles={["broker"]}>
-      <BrokerChatInbox />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/broker/chat/:conversationId"
-  element={
-    <ProtectedRoute allowedRoles={["broker"]}>
-      <BrokerChatPage />
-    </ProtectedRoute>
-  }
-/>
+      <Route path="/broker/chats" element={<ProtectedRoute allowedRoles={["broker"]}><BrokerChatInbox /></ProtectedRoute>}/>
+      <Route path="/broker/chat/:conversationId" element={<ProtectedRoute allowedRoles={["broker"]}><BrokerChatPage /></ProtectedRoute>} />
     </>
   );
 };

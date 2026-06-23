@@ -1,5 +1,4 @@
 import { Route } from "react-router-dom";
-
 import ProtectedRoute from
   "../pages/ProtectedRoute/protectedRoute";
 
@@ -26,7 +25,12 @@ import EditProperty from
 import OwnerPropertyCalendarPage from
   "../pages/Owner/OwnerPropertyCalendarPage";
 
-import OwnerPropertyConversations from "../pages/owner/OwnerPropertyConversations";
+import OwnerPropertyConversations from "../pages/Owner/OwnerPropertyConversations";
+import OwnerBookings from "../pages/Owner/OwnerBookings";
+import OwnerReviews from "../pages/Owner/OwnerReviews";
+
+
+
 
 const OwnerRoutes = () => {
 
@@ -124,10 +128,31 @@ const OwnerRoutes = () => {
           </ProtectedRoute>
         }
       />
-<Route
-  path="/owner/properties/:propertyId/conversations"
-  element={<OwnerPropertyConversations />}
-/>
+      <Route
+        path="/owner/properties/:propertyId/conversations"
+        element={
+          <ProtectedRoute allowedRoles={["owner"]}>
+            <OwnerPropertyConversations />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/owner/bookings"
+        element={
+          <ProtectedRoute allowedRoles={["owner"]}>
+            <OwnerBookings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/owner/reviews"
+        element={
+          <ProtectedRoute allowedRoles={["owner"]}>
+            <OwnerReviews />
+          </ProtectedRoute>
+        }
+      />
 
     </>
   );

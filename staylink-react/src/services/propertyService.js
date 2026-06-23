@@ -298,3 +298,19 @@ export const completeOwnerBooking = async (bookingId) => {
   return response.data;
 };
 
+export const getOwnerAllBookings = async () => {
+  const response = await API.get(
+    "/api/owner/bookings/"
+  );
+
+  return response.data;
+};
+
+export const getOwnerReviews = async () => {
+  const response = await API.get(
+    "/api/owner/reviews/"
+  );
+
+  return response.data;
+};
+

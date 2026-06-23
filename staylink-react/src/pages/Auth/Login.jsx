@@ -78,11 +78,25 @@ const LoginModal = () => {
 
       const res = await loginUser(form);
 
+      if (res.data.mfa_required) {
+        navigate("/mfa/verify-login", {
+          state: {
+            userId: res.data.user_id,
+            role: res.data.role,
+          },
+          replace: true,
+    });
+
+  return;
+}
+
       const saved = saveAuthData(res.data);
 
       if (!saved) return;
 
-      navigate(redirectUser(res.data.user));
+      navigate(redirectUser(res.data.user), {
+  replace: true,
+});
     } catch (err) {
       console.error(err.response?.data || err);
       alert(err.response?.data?.error || "Invalid credentials");
@@ -102,11 +116,25 @@ const LoginModal = () => {
         }
       );
 
+      if (res.data.mfa_required) {
+          navigate("/mfa/verify-login", {
+            state: {
+              userId: res.data.user_id,
+              role: res.data.role,
+            },
+            replace: true,
+          });
+
+          return;
+      }
+
       const saved = saveAuthData(res.data);
 
       if (!saved) return;
 
-      navigate(redirectUser(res.data.user));
+      navigate(redirectUser(res.data.user), {
+  replace: true,
+});
     } catch (err) {
       console.error(err.response?.data || err);
 

@@ -16,74 +16,76 @@ import BrokerChatPage from "../pages/Traveler/BrokerChatPage";
 import ProtectedRoute from "../pages/ProtectedRoute/protectedRoute";
 
 import MyBookings from "../pages/Traveler/MyBookings";
+import RoleBasedHome from "../routes/RoleBasedHome";
 
 const TravelerRoutes = () => {
   return (
     <>
-      <Route path="/" element={<Landing />} />
+      <Route path="/" element={<RoleBasedHome />} />
+      <Route path="/stays" element={<StaysPage />} />
+      <Route path="/properties/:id" element={<PropertyDetails />} />
 
       <Route
         path="/traveler/profile"
-        element={<TravelerProfile />}
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <TravelerProfile />
+          </ProtectedRoute>
+        }
       />
 
       <Route
         path="/traveler/complete-profile"
-        element={<CompleteProfile />}
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <CompleteProfile />
+          </ProtectedRoute>
+        }
       />
 
       <Route
-        path="/stays"
-        element={<StaysPage />}
+        path="/traveler/my-bookings"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <MyBookings />
+          </ProtectedRoute>
+        }
       />
 
       <Route
-        path="/properties/:id"
-        element={<PropertyDetails />}
+        path="/booking-confirmed"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <BookingConfirmed />
+          </ProtectedRoute>
+        }
       />
 
       <Route
-        path="/traveler/brokers"
-        element={<TravelerBrokers />}
+        path="/chat/:conversationId"
+        element={
+          <ProtectedRoute allowedRoles={["user", "owner"]}>
+            <ChatPage />
+          </ProtectedRoute>
+        }
       />
-
-      <Route
-        path="/traveler/brokers/:brokerId"
-        element={<BrokerDetails />}
-      />
-
-      <Route
-        path="/booking-confirmed/:bookingId"
-        element={<BookingConfirmed />}
-      />
-
-      {/* Broker chat must be above normal chat */}
       <Route
         path="/chat/broker/:conversationId"
         element={
-          <ProtectedRoute allowedRoles={["user", "broker", "owner"]}>
+          <ProtectedRoute allowedRoles={["user", "broker"]}>
             <BrokerChatPage />
           </ProtectedRoute>
         }
       />
 
       <Route
-  path="/chat/:conversationId"
-  element={
-    <ProtectedRoute allowedRoles={["user", "owner"]}>
-      <ChatPage />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/traveler/bookings"
-  element={
-    <ProtectedRoute allowedRoles={["user"]}>
-      <MyBookings />
-    </ProtectedRoute>
-  }
-/>
+        path="/traveler/brokers/:brokerId"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <BrokerDetails />
+          </ProtectedRoute>
+        }
+      />
     </>
   );
 };

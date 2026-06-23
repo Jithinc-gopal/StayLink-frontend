@@ -19,6 +19,7 @@ import {
   NotebookPen,
   ArrowRight,
   Loader2,
+  ShieldCheck,
 } from "lucide-react";
 
 const BrokerDashboard = () => {
@@ -26,12 +27,33 @@ const BrokerDashboard = () => {
 
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mfaEnabled, setMfaEnabled] = useState(true);
 
   const loadDashboard = async () => {
     try {
       setLoading(true);
+
       const res = await getBrokerDashboardStats();
+
       setDashboard(res.data);
+
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+
+      const updatedUser = {
+        ...storedUser,
+        is_2fa_enabled:
+          res.data?.profile?.user?.is_2fa_enabled ??
+          res.data?.profile?.is_2fa_enabled ??
+          storedUser?.is_2fa_enabled ??
+          false,
+      };
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(updatedUser)
+      );
+
+      setMfaEnabled(updatedUser.is_2fa_enabled);
     } catch (error) {
       console.error("Broker dashboard error:", error);
     } finally {
@@ -71,11 +93,13 @@ const BrokerDashboard = () => {
 
   const { profile, stats } = dashboard;
 
+  const isApproved =
+    profile?.verification_status === "approved";
+
   return (
     <BrokerLayout>
       <div className="space-y-8">
 
-        {/* WELCOME */}
         <section className="bg-slate-900 rounded-3xl p-8 text-white shadow-xl">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
@@ -103,13 +127,39 @@ const BrokerDashboard = () => {
           </div>
         </section>
 
-        {/* STATS */}
+        {isApproved && !mfaEnabled && (
+          <section className="bg-yellow-50 border border-yellow-200 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={22} className="text-yellow-700" />
+                <h3 className="text-lg font-bold text-yellow-900">
+                  Secure your broker account
+                </h3>
+              </div>
+
+              <p className="text-sm text-yellow-800 mt-2">
+                Set up Multi-Factor Authentication using an authenticator app
+                to protect your broker dashboard, connections, client data,
+                notes, and commission records.
+              </p>
+            </div>
+
+            <button
+              onClick={() => navigate("/mfa/setup")}
+              className="px-5 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-2xl font-semibold transition-colors"
+            >
+              Set up MFA
+            </button>
+          </section>
+        )}
+
         <QuickAction
-        icon={Users}
-        title="View Chats"
-        text="Reply to traveler broker chat messages."
-        onClick={() => navigate("/broker/chats")}
-/>
+          icon={Users}
+          title="View Chats"
+          text="Reply to traveler broker chat messages."
+          onClick={() => navigate("/broker/chats")}
+        />
+
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <StatCard
             icon={Building2}
@@ -140,7 +190,6 @@ const BrokerDashboard = () => {
           />
         </section>
 
-        {/* COMMISSION + ALERTS */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <InfoCard
             icon={IndianRupee}
@@ -166,7 +215,6 @@ const BrokerDashboard = () => {
           />
         </section>
 
-        {/* QUICK ACTIONS */}
         <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
           <div className="flex items-center justify-between mb-5">
             <div>

@@ -11,6 +11,7 @@ import {
   StickyNote,
   Menu,
   X,
+  ShieldCheck,
 } from "lucide-react";
 
 const BrokerNavbar = () => {
@@ -55,8 +56,19 @@ const BrokerNavbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("user");
+    localStorage.removeItem("role");
+    localStorage.removeItem("isLoged");
+
+    localStorage.removeItem("rzp_checkout_anon_id");
+    localStorage.removeItem("rzp_device_id");
+    localStorage.removeItem("rzp_stored_checkout_id");
+
+    setOpen(false);
+
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -115,6 +127,14 @@ const BrokerNavbar = () => {
             </button>
 
             <button
+              onClick={() => handleNavigate("/mfa/setup")}
+              className="p-2 rounded-xl text-slate-600 hover:bg-slate-100"
+              title="Security / MFA"
+            >
+              <ShieldCheck size={20} />
+            </button>
+
+            <button
               onClick={() => handleNavigate("/broker/profile")}
               className="p-2 rounded-xl text-slate-600 hover:bg-slate-100"
             >
@@ -168,6 +188,14 @@ const BrokerNavbar = () => {
           >
             <Bell size={17} />
             Notifications
+          </button>
+
+          <button
+            onClick={() => handleNavigate("/mfa/setup")}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100"
+          >
+            <ShieldCheck size={17} />
+            Security / MFA
           </button>
 
           <button
