@@ -15,10 +15,10 @@ export default function BookingConfirmed() {
           Confirmation email will be sent shortly. The owner has been notified.
         </p>
         <button
-          onClick={() => navigate('/my-trips')}
+          onClick={() => navigate("/traveler/my-bookings")}
           className="w-full bg-rose-500 text-white py-3 rounded-xl font-semibold hover:bg-rose-600"
         >
-          View My Trips
+          View My Bookings
         </button>
       </div>
     </div>

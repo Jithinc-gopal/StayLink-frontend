@@ -7,10 +7,20 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   const user = JSON.parse(localStorage.getItem("user"));
 
   if (!token || !user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return (
+      <Navigate
+        to="/login"
+        state={{ from: location }}
+        replace
+      />
+    );
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
+    if (user.role === "admin") {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+
     if (user.role === "owner") {
       return <Navigate to="/owner/dashboard" replace />;
     }

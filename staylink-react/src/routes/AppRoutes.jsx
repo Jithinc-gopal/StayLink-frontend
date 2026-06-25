@@ -5,11 +5,10 @@ import OwnerRoutes from "./OwnerRoutes";
 import BrokerRoutes from "./BrokerRoutes";
 import TravelerRoutes from "./TravelerRoutes";
 import PartnerRoutes from "./PartnerRoutes";
+import AdminRoutes from "./AdminRoutes";
 
 const AppRoutes = () => {
-
   return (
-
     <Routes>
 
       {TravelerRoutes()}
@@ -21,6 +20,8 @@ const AppRoutes = () => {
       {OwnerRoutes()}
 
       {BrokerRoutes()}
+
+      {AdminRoutes()}
 
     </Routes>
   );

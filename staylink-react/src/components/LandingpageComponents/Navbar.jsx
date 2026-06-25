@@ -342,26 +342,6 @@ export default function Navbar() {
                 )}
               </NavLink>
 
-              <NavLink
-                to="/experiences"
-                className={({ isActive }) =>
-                  `relative font-body tracking-wide transition-all duration-300 font-medium ${
-                    isActive
-                      ? "text-[#0052CC]"
-                      : "text-[#4A5568] hover:text-[#172B4D]"
-                  }`
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    Experiences
-                    {isActive && (
-                      <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-[#0052CC] rounded-full"></span>
-                    )}
-                  </>
-                )}
-              </NavLink>
-
               {isLoggedIn && (
                 <NavLink
                   to="/traveler/my-bookings"

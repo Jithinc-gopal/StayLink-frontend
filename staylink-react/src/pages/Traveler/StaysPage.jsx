@@ -35,28 +35,9 @@ export default function StaysPage() {
 
         setLoading(true);
 
-        const params = {
-
-          location:
-            searchParams.get(
-              "location"
-            ),
-
-          property_type:
-            searchParams.get(
-              "property_type"
-            ),
-
-          guests:
-            searchParams.get(
-              "guests"
-            ),
-
-          max_price:
-            searchParams.get(
-              "max_price"
-            ),
-        };
+        const params = Object.fromEntries(
+          searchParams.entries()
+        );
 
         const response =
           await searchProperties(

@@ -5,6 +5,10 @@ const PublicRoute = ({ children }) => {
   const user = JSON.parse(localStorage.getItem("user"));
 
   if (token && user) {
+    if (user.role === "admin") {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+
     if (user.role === "owner") {
       return <Navigate to="/owner/dashboard" replace />;
     }

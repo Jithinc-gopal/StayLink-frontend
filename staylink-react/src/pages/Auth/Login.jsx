@@ -24,6 +24,10 @@ const LoginModal = () => {
   };
 
   const redirectUser = (user) => {
+    if (user.role === "admin") {
+      return "/admin/dashboard";
+    }
+
     if (user.role === "owner") {
       return user.profile_completed
         ? "/owner/dashboard"
@@ -42,13 +46,8 @@ const LoginModal = () => {
   const saveAuthData = (data) => {
     const user = data.user;
 
-    const access =
-      data.access ||
-      data.access_token;
-
-    const refresh =
-      data.refresh ||
-      data.refresh_token;
+    const access = data.access || data.access_token;
+    const refresh = data.refresh || data.refresh_token;
 
     if (!user || !access) {
       console.log("Login response:", data);
@@ -65,6 +64,43 @@ const LoginModal = () => {
     return true;
   };
 
+  const handleMFAFlow = (data) => {
+    if (data.mfa_required) {
+      const path =
+        data.role === "admin"
+          ? "/admin/mfa-verify"
+          : "/mfa/verify-login";
+
+      navigate(path, {
+        state: {
+          userId: data.user_id,
+          role: data.role,
+          email: data.email,
+        },
+        replace: true,
+      });
+
+      return true;
+    }
+
+    if (
+      data.mfa_setup_required &&
+      data.user?.role === "admin"
+    ) {
+      const saved = saveAuthData(data);
+
+      if (!saved) return true;
+
+      navigate("/admin/mfa-setup", {
+        replace: true,
+      });
+
+      return true;
+    }
+
+    return false;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -77,26 +113,19 @@ const LoginModal = () => {
       setLoading(true);
 
       const res = await loginUser(form);
+      const data = res.data;
 
-      if (res.data.mfa_required) {
-        navigate("/mfa/verify-login", {
-          state: {
-            userId: res.data.user_id,
-            role: res.data.role,
-          },
-          replace: true,
-    });
+      const isMFAFlow = handleMFAFlow(data);
 
-  return;
-}
+      if (isMFAFlow) return;
 
-      const saved = saveAuthData(res.data);
+      const saved = saveAuthData(data);
 
       if (!saved) return;
 
-      navigate(redirectUser(res.data.user), {
-  replace: true,
-});
+      navigate(redirectUser(data.user), {
+        replace: true,
+      });
     } catch (err) {
       console.error(err.response?.data || err);
       alert(err.response?.data?.error || "Invalid credentials");
@@ -116,32 +145,29 @@ const LoginModal = () => {
         }
       );
 
-      if (res.data.mfa_required) {
-          navigate("/mfa/verify-login", {
-            state: {
-              userId: res.data.user_id,
-              role: res.data.role,
-            },
-            replace: true,
-          });
+      const data = res.data;
 
-          return;
-      }
+      const isMFAFlow = handleMFAFlow(data);
 
-      const saved = saveAuthData(res.data);
+      if (isMFAFlow) return;
+
+      const saved = saveAuthData(data);
 
       if (!saved) return;
 
-      navigate(redirectUser(res.data.user), {
-  replace: true,
-});
+      navigate(redirectUser(data.user), {
+        replace: true,
+      });
     } catch (err) {
       console.error(err.response?.data || err);
 
       if (err.response?.status === 404) {
         alert("Please register first");
       } else {
-        alert("Google login failed");
+        alert(
+          err.response?.data?.error ||
+            "Google login failed"
+        );
       }
     } finally {
       setLoading(false);
@@ -167,6 +193,7 @@ const LoginModal = () => {
               <br />
               Curated for You.
             </h2>
+
             <p className="text-[#f1f3ff] text-sm opacity-90 leading-relaxed max-w-xs">
               Experience the next generation of hybrid accommodation.
             </p>
@@ -178,6 +205,7 @@ const LoginModal = () => {
             <h1 className="font-sans text-3xl font-extrabold text-[#003d9b] tracking-tighter mb-1">
               StayLink
             </h1>
+
             <p className="text-[#434654] text-sm font-medium">
               Welcome back.
             </p>
@@ -233,7 +261,9 @@ const LoginModal = () => {
 
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() =>
+                    setShowPassword(!showPassword)
+                  }
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[#737685]"
                 >
                   {showPassword ? (

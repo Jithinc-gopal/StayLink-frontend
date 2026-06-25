@@ -53,7 +53,7 @@ const TravelerRoutes = () => {
       />
 
       <Route
-        path="/booking-confirmed"
+        path="/booking-confirmed/:bookingId"
         element={
           <ProtectedRoute allowedRoles={["user"]}>
             <BookingConfirmed />
