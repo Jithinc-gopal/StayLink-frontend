@@ -6,6 +6,8 @@ import {
   getBrokerConversationHistory,
 } from "../../services/chatService";
 
+import { WS_BASE_URL } from "../../services/api";
+
 const BrokerChatPage = () => {
   const { conversationId } = useParams();
   const navigate = useNavigate();
@@ -35,7 +37,13 @@ const BrokerChatPage = () => {
     connectSocket();
 
     return () => {
-      socketRef.current?.close();
+      if (
+        socketRef.current?.readyState === WebSocket.OPEN ||
+        socketRef.current?.readyState === WebSocket.CONNECTING
+      ) {
+        socketRef.current.close();
+      }
+
       clearTimeout(typingTimerRef.current);
     };
   }, [conversationId]);
@@ -66,9 +74,9 @@ const BrokerChatPage = () => {
   };
 
   const connectSocket = () => {
-    const wsUrl = `ws://localhost:8000/ws/chat/broker/${conversationId}/?token=${token}`;
-
-    const socket = new WebSocket(wsUrl);
+    const socket = new WebSocket(
+      `${WS_BASE_URL}/ws/chat/broker/${conversationId}/?token=${token}`
+    );
     socketRef.current = socket;
 
     socket.onopen = () => setConnected(true);

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TopNavbar from "../../components/OwnerDashboardCOmponents/TopNavbar";
 import { getOwnerProfile } from "../../services/authService";
+import { API_BASE_URL } from "../../services/api";
 
 const OwnerProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -77,7 +78,7 @@ const OwnerProfile = () => {
           <img
             src={
               profile?.profile_image
-                ? `http://127.0.0.1:8000${profile.profile_image}`
+                ? `${API_BASE_URL}${profile.profile_image}`
                 : "https://i.pravatar.cc/150"
             }
             alt="profile"
@@ -138,7 +139,7 @@ const OwnerProfile = () => {
 
             {profile?.id_proof && (
               <a
-                href={`http://127.0.0.1:8000${profile.id_proof}`}
+                href={`${API_BASE_URL}${profile.id_proof}`}
                 target="_blank"
                 rel="noreferrer"
                 className="px-5 py-2 border rounded-lg hover:bg-gray-100"

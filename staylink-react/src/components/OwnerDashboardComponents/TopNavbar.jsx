@@ -17,6 +17,11 @@ import {
   markAllNotificationsRead,
 } from "../../services/notificationService";
 
+import {
+  API_BASE_URL,
+  WS_BASE_URL,
+} from "../../services/api";
+
 const TopNavbar = ({ onSearch }) => {
   const [showDropdown, setShowDropdown] =
     useState(false);
@@ -81,13 +86,8 @@ const TopNavbar = ({ onSearch }) => {
 
     if (!token) return;
 
-    const wsProtocol =
-      window.location.protocol === "https:"
-        ? "wss"
-        : "ws";
-
     const socket = new WebSocket(
-      `${wsProtocol}://127.0.0.1:8000/ws/notifications/?token=${token}`
+      `${WS_BASE_URL}/ws/notifications/?token=${token}`
     );
 
     notificationSocketRef.current = socket;
@@ -396,10 +396,10 @@ const TopNavbar = ({ onSearch }) => {
             <img
               src={
                 profile?.profile_image
-                  ? `http://127.0.0.1:8000${profile.profile_image}`
+                  ? `${API_BASE_URL}${profile.profile_image}`
                   : "https://i.pravatar.cc/100"
               }
-              alt="profile"
+                            alt="profile"
               className="h-10 w-10 rounded-full cursor-pointer border-2 border-slate-200 object-cover hover:border-slate-400 transition-all"
               onClick={() =>
                 setShowDropdown(

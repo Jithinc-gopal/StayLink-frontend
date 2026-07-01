@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getConversation } from "../../services/chatService";
+import { WS_BASE_URL } from "../../services/api";
 
 const ChatPage = () => {
   const { conversationId } = useParams();
@@ -33,7 +34,14 @@ const ChatPage = () => {
     connectWebSocket();
 
     return () => {
-      socketRef.current?.close();
+      if (
+        socketRef.current?.readyState === WebSocket.OPEN ||
+        socketRef.current?.readyState === WebSocket.CONNECTING
+      ) {
+        socketRef.current.close();
+      }
+
+      socketRef.current = null;
       clearTimeout(typingTimeoutRef.current);
     };
   }, [conversationId]);
@@ -77,12 +85,9 @@ const ChatPage = () => {
 // WEBSOCKET
 // ==========================
 const connectWebSocket = () => {
-  const wsProtocol =
-    window.location.protocol === "https:" ? "wss" : "ws";
-
-  const wsUrl = `${wsProtocol}://localhost:8000/ws/chat/conversation/${conversationId}/?token=${token}`;
-
-  const socket = new WebSocket(wsUrl);
+  const socket = new WebSocket(
+    `${WS_BASE_URL}/ws/chat/conversation/${conversationId}/?token=${token}`
+  );
 
   socketRef.current = socket;
 

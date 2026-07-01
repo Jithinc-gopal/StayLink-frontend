@@ -26,6 +26,8 @@ import {
   markAllNotificationsRead,
 } from "../../services/notificationService";
 
+import { WS_BASE_URL } from "../../services/api";
+
 export default function Navbar() {
   const navigate = useNavigate();
 
@@ -118,11 +120,8 @@ export default function Navbar() {
 
       if (!token) return;
 
-      const wsProtocol =
-        window.location.protocol === "https:" ? "wss" : "ws";
-
       const socket = new WebSocket(
-        `${wsProtocol}://127.0.0.1:8000/ws/notifications/?token=${token}`
+        `${WS_BASE_URL}/ws/notifications/?token=${token}`
       );
 
       notificationSocketRef.current = socket;
@@ -141,12 +140,6 @@ export default function Navbar() {
     );
   };
 
-  socket.onerror = (error) => {
-    console.error(
-      "Notification WebSocket error:",
-      error
-    );
-  };
   // ====================
 
       socket.onmessage = (event) => {
@@ -165,8 +158,13 @@ export default function Navbar() {
       };
 
       return () => {
-        socket.close();
-      };
+          if (
+            socket.readyState === WebSocket.OPEN ||
+            socket.readyState === WebSocket.CONNECTING
+          ) {
+            socket.close();
+          }
+    };
 }, [isLoggedIn]);
 
   useEffect(() => {
