@@ -1,7 +1,7 @@
 import { ArrowLeft, Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import TopNavbar from "../../components/OwnerDashboardCOmponents/TopNavbar";
+import TopNavbar from "../../components/OwnerDashboardComponents/TopNavbar";
 import PropertyAddForm from "../../components/ownerProperty/PropertyAddForm";
 
 const AddProperty = () => {

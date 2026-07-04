@@ -1,7 +1,6 @@
 import { Route } from "react-router-dom";
 
-import ProtectedRoute from "../pages/ProtectedRoute/ProtectedRoute";
-
+import ProtectedRoute from "../pages/ProtectedRoute/protectedRoute";
 import AdminMFASetup from "../pages/Admin/AdminMFASetup";
 import AdminMFAVerify from "../pages/Admin/AdminMFAVerify";
 import AdminDashboard from "../pages/Admin/AdminDashboard";

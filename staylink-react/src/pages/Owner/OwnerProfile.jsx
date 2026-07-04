@@ -1,7 +1,7 @@
 // pages/Owner/OwnerProfile.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TopNavbar from "../../components/OwnerDashboardCOmponents/TopNavbar";
+import TopNavbar from "../../components/OwnerDashboardComponents/TopNavbar";
 import { getOwnerProfile } from "../../services/authService";
 import { API_BASE_URL } from "../../services/api";
 
