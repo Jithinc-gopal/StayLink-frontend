@@ -3,7 +3,8 @@ import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../services/authService";
 import { GoogleLogin } from "@react-oauth/google";
-import axios from "axios";
+import API from "../../services/api";
+
 
 const LoginModal = () => {
   const navigate = useNavigate();
@@ -138,8 +139,8 @@ const LoginModal = () => {
     try {
       setLoading(true);
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/accounts/google-login/`,
+      const res = await API.post(
+        "/api/accounts/google-login/",
         {
           token: credentialResponse.credential,
         }
