@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 
-const AI_SERVICE_URL = "http://localhost:8001";
+const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL;
+console.log("AI URL:", import.meta.env.VITE_AI_SERVICE_URL);
 
 const GREETING = {
   role: "assistant",
