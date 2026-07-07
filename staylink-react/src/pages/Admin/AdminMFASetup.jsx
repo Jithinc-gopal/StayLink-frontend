@@ -14,8 +14,9 @@ export default function AdminMFASetup() {
     try {
       setLoading(true);
 
-      const res = await API.post(
-        "/api/admin/auth/mfa-setup/"
+      await API.post(
+        "/api/admin/auth/mfa/verify-setup/",
+        { code }
       );
 
       setQrCode(res.data.qr_code);
