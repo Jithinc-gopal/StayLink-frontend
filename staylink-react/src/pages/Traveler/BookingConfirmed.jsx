@@ -10,7 +10,7 @@ export default function BookingConfirmed() {
         <div className="text-6xl mb-4">🎉</div>
         <h1 className="text-3xl font-bold text-green-600 mb-2">Booking Confirmed!</h1>
         <p className="text-gray-500 mb-1">Your Booking ID</p>
-        <p className="text-2xl font-bold text-gray-800 mb-4">#{bookingId}</p>
+        <p className="text-2xl font-bold text-gray-800 mb-4">{bookingId}</p>
         <p className="text-gray-400 text-sm mb-6">
           Confirmation email will be sent shortly. The owner has been notified.
         </p>
