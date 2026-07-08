@@ -10,11 +10,13 @@ import BrokerNotes from "../pages/Broker/BrokerNotes";
 import BrokerNotifications from "../pages/Broker/BrokerNotifications";
 import BrokerChatInbox from "../pages/Broker/BrokerChatInbox";
 import BrokerChatPage from "../pages/Traveler/BrokerChatPage";
+import BrokerSetup from "../pages/Auth/BrokerSetup";
 
 const BrokerRoutes = () => {
   return (
     <>
       <Route path="/broker/dashboard" element={<ProtectedRoute allowedRoles={["broker"]}><BrokerDashboard /></ProtectedRoute>} />
+      <Route path="/broker/setup" element={<ProtectedRoute allowedRoles={["broker"]}><BrokerSetup /></ProtectedRoute>}/>
       <Route path="/broker/profile" element={<ProtectedRoute allowedRoles={["broker"]}><BrokerProfile /></ProtectedRoute>} />
       <Route path="/broker/properties" element={<ProtectedRoute allowedRoles={["broker"]}><BrokerProperties /></ProtectedRoute>} />
       <Route path="/broker/connections" element={<ProtectedRoute allowedRoles={["broker"]}><BrokerConnections /></ProtectedRoute>} />
