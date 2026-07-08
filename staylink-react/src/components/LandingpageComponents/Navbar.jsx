@@ -80,6 +80,7 @@ export default function Navbar() {
           localStorage.removeItem("rzp_checkout_anon_id");
           localStorage.removeItem("rzp_device_id");
           localStorage.removeItem("rzp_stored_checkout_id");
+          localStorage.removeItem("staylink_ai_chat_guest");
 
           setCurrentUser(null);
           navigate("/login");
