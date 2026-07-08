@@ -199,18 +199,6 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
-    // FIX: capture the current user's AI chat storage key BEFORE
-    // clearing "access" below — otherwise we lose the ability to
-    // identify which user's chat history to remove.
-    let aiChatKeyToRemove = "staylink_ai_chat_guest";
-    try {
-      const token = localStorage.getItem("access");
-      if (token) {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        aiChatKeyToRemove = `staylink_ai_chat_${payload.user_id}`;
-      }
-    } catch {}
-
     try {
       const refresh = localStorage.getItem("refresh");
 
@@ -238,11 +226,6 @@ export default function Navbar() {
       localStorage.removeItem("rzp_checkout_anon_id");
       localStorage.removeItem("rzp_device_id");
       localStorage.removeItem("rzp_stored_checkout_id");
-
-      // FIX: clear this user's AI chat history on logout so it
-      // never bleeds into the next person who logs in on this device.
-      localStorage.removeItem(aiChatKeyToRemove);
-      localStorage.removeItem("staylink_ai_chat_guest");
 
       setCurrentUser(null);
       setOpen(false);
