@@ -9,12 +9,12 @@ const GREETING = {
 };
 
 // Storage key — per user so different logins don't share history
+// FIX: was reading "authTokens"/"token", which don't exist in this app.
+// The app actually stores the JWT under "access" (see api.js / Navbar.jsx).
 function getStorageKey() {
   try {
-    const raw = localStorage.getItem("authTokens") || localStorage.getItem("token");
-    if (raw) {
-      // parse JWT payload to get user id
-      const token = raw.includes("{") ? JSON.parse(raw)?.access : raw;
+    const token = localStorage.getItem("access");
+    if (token) {
       const payload = JSON.parse(atob(token.split(".")[1]));
       return `staylink_ai_chat_${payload.user_id}`;
     }
@@ -61,6 +61,16 @@ export default function AIChat({ isOpen, onClose }) {
       saveHistory(messages);
     }
   }, [messages]);
+
+  // FIX: reload history whenever the chat panel opens.
+  // AIChat can stay mounted across login/logout, so without this,
+  // reopening the chat after switching accounts would still show
+  // whatever was in state from the previous user.
+  useEffect(() => {
+    if (isOpen) {
+      setMessages(loadHistory());
+    }
+  }, [isOpen]);
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
